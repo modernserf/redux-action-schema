@@ -4,7 +4,7 @@
   "description": "better action management for redux",
   "main": "dist/index.js",
   "scripts": {
-    "test": "node test.js | node_modules/.bin/faucet",
+    "test": "node test/index.js | node_modules/.bin/faucet",
     "build": "mkdir -p dist && node_modules/.bin/buble src/index.js > dist/index.js",
     "prepublish": "npm run build",
     "deploy": "npm test && npm publish"
@@ -25,6 +25,7 @@
   "devDependencies": {
     "buble": "^0.11.5",
     "faucet": "0.0.1",
+    "redux": "^3.5.2",
     "tape": "^4.5.1"
   }
 }
