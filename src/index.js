@@ -7,16 +7,19 @@ const types = {
 const merge = (a, b) => Object.assign({}, a, b)
 const uncons = (array) => [array[0], array.slice(1)]
 
+// TODO: handle 3rd party actions
 const defaultMiddlewareOptions = {
     checkPayloads: false,
     onError: console.error.bind(console, "unknown action:"),
+    ignoreActions: ["EFFECT_TRIGGERED","EFFECT_RESOLVED", "@@router/UPDATE_LOCATION"],
 }
 
 const middlewareHelper = (tests, unformat) => (options = {}) => {
-    const { checkPayloads, onError } = merge(defaultMiddlewareOptions, options)
+    const { ignoreActions, checkPayloads, onError } = merge(defaultMiddlewareOptions, options)
+    const ignoreMap = ignoreActions.reduce((obj, key) => { obj[key] = true; return obj }, {})
     return () => (next) => (action) => {
         const { type, payload } = unformat(action)
-        if (!tests[type] || (checkPayloads && !tests[type](payload))) {
+        if (!ignoreMap[type] && !tests[type] || (checkPayloads && !tests[type](payload))) {
             onError(action)
         }
         return next(action)
