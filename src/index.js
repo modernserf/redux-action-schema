@@ -7,7 +7,6 @@ const types = {
 const merge = (a, b) => Object.assign({}, a, b)
 const uncons = (array) => [array[0], array.slice(1)]
 
-// TODO: handle 3rd party actions
 const defaultMiddlewareOptions = {
     checkPayloads: false,
     onError: console.error.bind(console, "unknown action:"),
