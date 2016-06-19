@@ -1,0 +1,30 @@
+{
+  "name": "redux-action-schema",
+  "version": "0.1.0",
+  "description": "better action management for redux",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "node test.js | node_modules/.bin/faucet",
+    "build": "mkdir dist && node_modules/.bin/buble src/index.js > dist/index.js",
+    "prepublish": "npm run build",
+    "deploy": "npm run test && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modernserf/redux-action-schema.git"
+  },
+  "keywords": [
+    "redux"
+  ],
+  "author": "Justin Falcone <justin@justinfalcone.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/modernserf/redux-action-schema/issues"
+  },
+  "homepage": "https://github.com/modernserf/redux-action-schema#readme",
+  "devDependencies": {
+    "buble": "^0.11.5",
+    "faucet": "0.0.1",
+    "tape": "^4.5.1"
+  }
+}
