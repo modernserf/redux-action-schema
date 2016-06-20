@@ -14,6 +14,12 @@ Redux Action Schema is a library for managing actions in Redux apps. It is a rep
     + [Reducers](#reducers)
     + [Middleware](#middleware)
 - [API Reference](#api-reference)
+    + [types](#types)
+    + [makeSchema](#makeschema)
+    + [actions](#actions)
+    + [actionCreators](#actioncreators)
+    + [createReducer](#createreducer)
+    + [createMiddleware](#createmiddleware)
 
 # Guide
 
@@ -143,7 +149,11 @@ You may choose to use all these features at once, or mix and match -- you don't 
 
 # API Reference
 
-## Types
+```
+const { types, makeSchema } = import "redux-action-schema"
+```
+
+## types
 
 Types are used for schema definitions and action validation.
 
@@ -183,7 +193,7 @@ makeSchema(actions, [options])
 
 ### Returns
 
-(`{ [actions](#actions), [actionCreators](#actioncreators), [createReducer](#createreducer), [createMiddleware](#createmiddleware) }`): a collection of objects and functions for working with the schema.
+({ [actions](#actions), [actionCreators](#actioncreators), [createReducer](#createreducer), [createMiddleware](#createmiddleware) }): a collection of objects and functions for working with the schema.
 
 ### Action definitions
 
