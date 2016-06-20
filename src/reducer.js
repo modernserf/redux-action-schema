@@ -1,3 +1,5 @@
+// TODO: throw custom functions
+
 export const reducerHelper = (actions, unformat) => (obj, initState) => {
     const nObj = {}
     for (const key in obj) {

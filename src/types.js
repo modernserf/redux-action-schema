@@ -3,9 +3,14 @@ export const types = {
         !!val && !Array.isArray(val) && typeof val === "object",
     Number: (val) => typeof val === "number",
     String: (val) => typeof val === "string",
+    Boolean: (val) => val === true || val === false,
     Array: Array.isArray,
     Any: (val) => val !== undefined && val !== null,
 }
+
+// TODO: OneOfType takes array instead of args?
+// TODO: OneOf takes object and matches values
+// TODO: types.Flag === types.Boolean.optional
 
 const optional = (fn) => (val) =>
     val === undefined || val === null || fn(val)

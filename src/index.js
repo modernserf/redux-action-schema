@@ -12,6 +12,9 @@ const defaultParams = {
     namespace: "",
 }
 
+// TODO: combineSchema
+// TODO: namespace takes fn
+
 export function makeSchema (schema, params = {}) {
     const { format, unformat, namespace } = merge(defaultParams, params)
     const parsed = schema.map(parseAction)

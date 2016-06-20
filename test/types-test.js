@@ -12,6 +12,8 @@ test("type checking", (t) => {
         [false, false, false, false, true, false, false])
     t.deepEquals(vals.map(types.String),
         [false, false, false, true, false, false, false])
+    t.deepEquals(vals.map(types.Boolean),
+        [false, false, true, false, false, false, false])
     t.deepEquals(vals.map(types.Array),
         [false, false, false, false, false, false, true])
     t.deepEquals(vals.map(types.Any),

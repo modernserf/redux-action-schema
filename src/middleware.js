@@ -6,6 +6,8 @@ const defaultMiddlewareOptions = {
 
 const merge = (a, b) => Object.assign({}, a, b)
 
+// TODO: separate onError for unknown actions & bad props
+
 export const middlewareHelper = (tests, unformat) => (options = {}) => {
     const { ignoreActions, ignorePayloads, onError } = merge(defaultMiddlewareOptions, options)
     const ignoreMap = ignoreActions.reduce((obj, key) => { obj[key] = true; return obj }, {})
