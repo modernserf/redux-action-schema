@@ -8,15 +8,15 @@ test("create middleware", (t) => {
         ["bar", types.String],
     ])
 
-    const initState =  { count: 0, message: "hello" }
+    const initState = { count: 0, message: "hello" }
 
     const reducer = createReducer({
         foo: (state) => state,
         bar: (state) => state,
-    })
+    }, initState)
 
     const middleware = createMiddleware({
-        onError: () => { throw new Error("unknown action") }
+        onError: () => { throw new Error("unknown action") },
     })
 
     const store = createStore(reducer, applyMiddleware(middleware))
@@ -28,10 +28,10 @@ test("create middleware", (t) => {
         store.dispatch({ type: "EFFECT_TRIGGERED" })
     })
     t.doesNotThrow(() => {
-        store.dispatch({ type: "bar", payload: "world", meta: { a: 1 }})
+        store.dispatch({ type: "bar", payload: "world", meta: { a: 1 } })
     })
     t.throws(() => {
-        store.dispatch({ type: "bar", payload: { a: "bad argument" }})
+        store.dispatch({ type: "bar", payload: { a: "bad argument" } })
     })
     t.throws(() => {
         store.dispatch({ type: "foo", payload: "arg" })
@@ -48,16 +48,16 @@ test("create middleware with unchecked payloads", (t) => {
         ["bar", types.String],
     ])
 
-    const initState =  { count: 0, message: "hello" }
+    const initState = { count: 0, message: "hello" }
 
     const reducer = createReducer({
         foo: (state) => state,
         bar: (state) => state,
-    })
+    }, initState)
 
     const middleware = createMiddleware({
         ignorePayloads: true,
-        onError: () => { throw new Error("unknown action") }
+        onError: () => { throw new Error("unknown action") },
     })
 
     const store = createStore(reducer, applyMiddleware(middleware))
@@ -69,10 +69,10 @@ test("create middleware with unchecked payloads", (t) => {
         store.dispatch({ type: "EFFECT_TRIGGERED" })
     })
     t.doesNotThrow(() => {
-        store.dispatch({ type: "bar", payload: "world", meta: { a: 1 }})
+        store.dispatch({ type: "bar", payload: "world", meta: { a: 1 } })
     })
     t.doesNotThrow(() => {
-        store.dispatch({ type: "bar", payload: { a: "bad argument" }})
+        store.dispatch({ type: "bar", payload: { a: "bad argument" } })
     })
     t.throws(() => {
         store.dispatch({ type: "quux" })
@@ -86,16 +86,16 @@ test("create middleware with ignored actions", (t) => {
         ["bar", types.String],
     ])
 
-    const initState =  { count: 0, message: "hello" }
+    const initState = { count: 0, message: "hello" }
 
     const reducer = createReducer({
         foo: (state) => state,
         bar: (state) => state,
-    })
+    }, initState)
 
     const middleware = createMiddleware({
         ignoreActions: ["baz", "quux"],
-        onError: () => { throw new Error("unknown action") }
+        onError: () => { throw new Error("unknown action") },
     })
 
     const store = createStore(reducer, applyMiddleware(middleware))

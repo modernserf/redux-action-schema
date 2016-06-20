@@ -7,16 +7,16 @@ test("create reducer", (t) => {
     const { createReducer } = makeSchema([
         ["foo"],
         ["bar", types.String],
-        ["baz", ["a", types.Number], ["b", types.Number]]
+        ["baz", ["a", types.Number], ["b", types.Number]],
     ])
 
-    const initState =  { count: 0, message: "hello" }
+    const initState = { count: 0, message: "hello" }
 
     const reducer = createReducer({
         foo: (state) => merge(state, { count: state.count + 1 }),
         bar: (state, message) => merge(state, { message }),
         baz: (state, { a, b }, { meta }) =>
-            merge(state, { count: a + b, message: meta || state.message })
+            merge(state, { count: a + b, message: meta || state.message }),
     }, initState)
 
     t.equal(initState, reducer(undefined, { type: "@@INIT" }))
@@ -68,7 +68,7 @@ test("create namespaced reducer", (t) => {
         ["bar", types.String],
     ], { namespace: "ns" })
 
-    const initState =  { count: 0, message: "hello" }
+    const initState = { count: 0, message: "hello" }
 
     const reducer = createReducer({
         foo: (state) => merge(state, { count: state.count + 1 }),

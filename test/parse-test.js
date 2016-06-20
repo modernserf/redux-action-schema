@@ -16,29 +16,29 @@ test("parses a valid schema", (t) => {
         ])
 
         t.deepEquals(schema.foo, {
-            type: "foo", doc: "has no arguments", args: []
+            type: "foo", doc: "has no arguments", args: [],
         })
         t.deepEquals(schema.bar, {
-            type: "bar", doc: "", args: []
+            type: "bar", doc: "", args: [],
         })
         t.deepEquals(schema.baz, {
             type: "baz", doc: "has single argument",
-            args: [{ test: types.String, doc: "",  wholePayload: true }]
+            args: [{ test: types.String, doc: "", wholePayload: true }],
         })
         t.deepEquals(schema.quux, {
             type: "quux", doc: "",
-            args: [{test: types.Number, doc: "", wholePayload: true }]
+            args: [{ test: types.Number, doc: "", wholePayload: true }],
         })
         t.deepEquals(schema.plugh, {
-            type: "plugh", doc:"has single named argument",
-            args: [{ id: "a", doc: "argument a", test: types.String }]
+            type: "plugh", doc: "has single named argument",
+            args: [{ id: "a", doc: "argument a", test: types.String }],
         })
         t.deepEquals(schema.xyzzy, {
             type: "xyzzy", doc: "",
             args: [
                 { id: "a", doc: "argument a", test: types.String },
-                { id: "b", doc: "", test: types.Number }
-            ]
+                { id: "b", doc: "", test: types.Number },
+            ],
         })
     } catch (e) {
         t.fail("valid schema generation threw an error")

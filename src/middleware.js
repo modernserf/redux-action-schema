@@ -1,7 +1,7 @@
 const defaultMiddlewareOptions = {
     ignorePayloads: false,
     onError: console.error.bind(console, "unknown action:"),
-    ignoreActions: ["EFFECT_TRIGGERED","EFFECT_RESOLVED", "@@router/UPDATE_LOCATION"],
+    ignoreActions: ["EFFECT_TRIGGERED", "EFFECT_RESOLVED", "@@router/UPDATE_LOCATION"],
 }
 
 const merge = (a, b) => Object.assign({}, a, b)

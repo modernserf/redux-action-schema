@@ -20,10 +20,12 @@ const tParams = {
         Array.isArray(val) && !!val.every(typeFn),
     OneOfType: function (...args) {
         return (val) => args.some((test) => test(val))
-    }
+    },
 }
 
-const compose = (a, b) => (val) => a(b(val))
+const compose = (a, b) => function (...args) {
+    return a(b.apply(this, args))
+}
 
 for (const key in tParams) {
     types[key] = tParams[key]

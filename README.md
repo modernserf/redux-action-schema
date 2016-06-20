@@ -46,18 +46,17 @@ const show = ["all", "active", "completed"]
 const todoID = (value) => typeof value === "number" && value > 0
 
 const schema = makeSchema([
-    ["add_todo", "here is a docstring",
+    ["addTodo", "here is a docstring",
         ["id", todoID],
         ["text", types.String]],
-    ["edit_todo",
+    ["editTodo",
         ["id", "params can have docstrings too", todoID],
         ["text", types.String]]
-    ["complete_todo", todoID],
-    ["delete_todo", todoID],
-    ["complete_all"],
-    ["clear_completed"],
-    ["set_visibility", types.OneOf(show)]
-])
+    ["completeTodo", todoID],
+    ["deleteTodo", todoID],
+    ["completeAll"],
+    ["clearCompleted"],
+    ["setVisibility", types.OneOf(show)]])
 ```
 
 ## Using actions & action creators
@@ -69,11 +68,11 @@ The schema automatically generates action constants and action creators.
 Protect against typos and automatically handle namespaces with generated actions:
 
 ```
-schema.actions.add_todo // => "add_todo"
-schema.actions.ad_todo  // => undefined
+schema.actions.addTodo // => "addTodo"
+schema.actions.adTodo  // => undefined
 
 const fooSchema = makeSchema([...], { namespace: "foo" })
-schema.actions.add_todo // => "foo_add_todo"
+schema.actions.addTodo // => "foo_addTodo"
 ```
 
 ### Action creators
@@ -81,14 +80,14 @@ schema.actions.add_todo // => "foo_add_todo"
 An action creator is generated for each action in the schema:
 
 ```
-const { edit_todo, complete_todo } = schema.actionCreators
-edit_todo({id: 10, text: "write docs"})
-// => { type: "edit_todo", payload: { id: 10, text: "write docs" } }
+const { editTodo, completeTodo } = schema.actionCreators
+editTodo({id: 10, text: "write docs"})
+// => { type: "editTodo", payload: { id: 10, text: "write docs" } }
 
-complete_todo(20) // => { type: "complete_todo", payload: 20 }
+completeTodo(20) // => { type: "completeTodo", payload: 20 }
 
-edit_todo.byPosition(10, "write GOOD docs")
-// => { type: "edit_todo", payload: { id: 10, text: "write GOOD docs" } }
+editTodo.byPosition(10, "write GOOD docs")
+// => { type: "editTodo", payload: { id: 10, text: "write GOOD docs" } }
 ```
 
 ## Reducers
@@ -97,9 +96,9 @@ The schema can be used to create and validate simple reducers a la redux-action'
 
 ```
 const todoReducer = schema.createReducer({
-    add_todo: (state, { id, text }) =>
+    addTodo: (state, { id, text }) =>
         state.concat([{ id, text, completed: false }])
-    complete_todo: (state, id) =>
+    completeTodo: (state, id) =>
         state.map((todo) => todo.id === id
             ? { ...todo, completed: !todo.completed }
             : todo)
@@ -128,7 +127,7 @@ const store = createStore(
     })))
 
 store.dispatch({ type: "idunno" }) // error
-store.dispatch({ type: "complete_todo", payload: "notAnID" }) // error
+store.dispatch({ type: "completeTodo", payload: "notAnID" }) // error
 ```
 
 You may choose to use all these features at once, or mix and match -- you don't need to use the action creators or createReducer to benefit from the middleware, nor vice versa.

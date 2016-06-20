@@ -5,7 +5,7 @@ test("makes action map", (t) => {
     const { actions } = makeSchema([
         ["foo"],
         ["bar"],
-        ["baz"]
+        ["baz"],
     ])
 
     t.deepEquals(actions, { foo: "foo", bar: "bar", baz: "baz" })
@@ -16,11 +16,11 @@ test("makes action map with namespace", (t) => {
     const { actions } = makeSchema([
         ["foo"],
         ["bar"],
-        ["baz"]
+        ["baz"],
     ], { namespace: "ns" })
 
     t.deepEquals(actions, {
-        foo: "ns_foo", bar: "ns_bar", baz: "ns_baz"
+        foo: "ns_foo", bar: "ns_bar", baz: "ns_baz",
     })
     t.end()
 })
@@ -31,14 +31,14 @@ test("makes action creators", (t) => {
     const { actionCreators } = makeSchema([
         ["foo"],
         ["bar", types.String],
-        ["baz", ["a", types.Number], ["b", types.Number]]
+        ["baz", ["a", types.Number], ["b", types.Number]],
     ])
     t.deepEquals(actionCreators.foo(),
         { type: "foo", payload: undefined })
     t.deepEquals(actionCreators.bar("value"),
         { type: "bar", payload: "value" })
     t.deepEquals(actionCreators.baz({ a: 1, b: 2 }),
-        { type: "baz", payload: { a: 1, b: 2 }})
+        { type: "baz", payload: { a: 1, b: 2 } })
     t.end()
 })
 
@@ -46,7 +46,7 @@ test("makes positional argument action creators", (t) => {
     const { actionCreators: ac } = makeSchema([
         ["foo"],
         ["bar", types.String],
-        ["baz", ["a", types.Number], ["b", types.Number]]
+        ["baz", ["a", types.Number], ["b", types.Number]],
     ])
     t.deepEquals(ac.foo.byPosition("any", "value"),
         { type: "foo", payload: undefined })
@@ -65,12 +65,12 @@ test("makes action creators with alternate format", (t) => {
     const { actionCreators: ac } = makeSchema([
         ["foo"],
         ["bar", types.String],
-        ["baz", ["a", types.Number], ["b", types.Number]]
+        ["baz", ["a", types.Number], ["b", types.Number]],
     ], { format, unformat })
 
     t.deepEquals(ac.foo(), ["foo"])
     t.deepEquals(ac.bar("value"), ["bar", "value"])
-    t.deepEquals(ac.baz({ a: 1, b: 2}), ["baz", {a: 1, b: 2}])
+    t.deepEquals(ac.baz({ a: 1, b: 2 }), ["baz", {a: 1, b: 2}])
     t.deepEquals(ac.baz.byPosition(0, 2), ["baz", {a: 0, b: 2}])
     t.end()
 })
@@ -79,7 +79,7 @@ test("makes namespaced action creators", (t) => {
     const { actionCreators: ac } = makeSchema([
         ["foo"],
         ["bar", types.String],
-        ["baz", ["a", types.Number], ["b", types.Number]]
+        ["baz", ["a", types.Number], ["b", types.Number]],
     ], { namespace: "ns" })
 
     t.deepEquals(ac.foo(),
@@ -87,7 +87,7 @@ test("makes namespaced action creators", (t) => {
     t.deepEquals(ac.bar("value"),
         { type: "ns_bar", payload: "value" })
     t.deepEquals(ac.baz({ a: 1, b: 2 }),
-        { type: "ns_baz", payload: { a: 1, b: 2 }})
+        { type: "ns_baz", payload: { a: 1, b: 2 } })
     t.end()
 })
 
@@ -95,7 +95,7 @@ test("tests actions for validity", (t) => {
     const { test: testAction } = makeSchema([
         ["foo"],
         ["bar", types.String],
-        ["baz", ["a", types.Number], ["b", types.Number]]
+        ["baz", ["a", types.Number], ["b", types.Number]],
     ])
 
     t.false(testAction({ type: "unknown" }))
