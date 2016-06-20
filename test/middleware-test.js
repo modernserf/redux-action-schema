@@ -30,8 +30,11 @@ test("create middleware", (t) => {
     t.doesNotThrow(() => {
         store.dispatch({ type: "bar", payload: "world", meta: { a: 1 }})
     })
-    t.doesNotThrow(() => {
+    t.throws(() => {
         store.dispatch({ type: "bar", payload: { a: "bad argument" }})
+    })
+    t.throws(() => {
+        store.dispatch({ type: "foo", payload: "arg" })
     })
     t.throws(() => {
         store.dispatch({ type: "quux" })
@@ -39,7 +42,7 @@ test("create middleware", (t) => {
     t.end()
 })
 
-test("create middleware with checked payloads", (t) => {
+test("create middleware with unchecked payloads", (t) => {
     const { createReducer, createMiddleware } = makeSchema([
         ["foo"],
         ["bar", types.String],
@@ -53,7 +56,7 @@ test("create middleware with checked payloads", (t) => {
     })
 
     const middleware = createMiddleware({
-        checkPayloads: true,
+        ignorePayloads: true,
         onError: () => { throw new Error("unknown action") }
     })
 
@@ -68,11 +71,8 @@ test("create middleware with checked payloads", (t) => {
     t.doesNotThrow(() => {
         store.dispatch({ type: "bar", payload: "world", meta: { a: 1 }})
     })
-    t.throws(() => {
+    t.doesNotThrow(() => {
         store.dispatch({ type: "bar", payload: { a: "bad argument" }})
-    })
-    t.throws(() => {
-        store.dispatch({ type: "foo", payload: "arg" })
     })
     t.throws(() => {
         store.dispatch({ type: "quux" })

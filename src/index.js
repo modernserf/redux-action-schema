@@ -1,26 +1,54 @@
-const types = {
-    Object: (val) => val && typeof val === "object",
-    Number: (val) => typeof val === "number",
-    String: (val) => typeof val === "string",
-}
+const types = (() => {
+    const t = {
+        Object: (val) =>
+            !!val && !Array.isArray(val) && typeof val === "object",
+        Number: (val) => typeof val === "number",
+        String: (val) => typeof val === "string",
+        Array: Array.isArray,
+        Any: (val) => val !== undefined && val !== null,
+    }
+
+    const optional = (fn) => (val) =>
+        val === undefined || val === null || fn(val)
+
+    for (const key in t) {
+        t[key].optional = optional(t[key])
+    }
+
+    const tParams = {
+        OneOf: (opts) => (val) => opts.indexOf(val) !== -1,
+        ArrayOf: (typeFn) => (val) =>
+            Array.isArray(val) && !!val.every(typeFn),
+        OneOfType: function (...args) {
+            return (val) => args.some((test) => test(val))
+        }
+    }
+
+    for (const key in tParams) {
+        t[key] = tParams[key]
+        t[key].optional = (opts) => optional(tParams[key](opts))
+    }
+
+    return t
+})()
 
 const merge = (a, b) => Object.assign({}, a, b)
 const uncons = (array) => [array[0], array.slice(1)]
 
 const defaultMiddlewareOptions = {
-    checkPayloads: false,
+    ignorePayloads: false,
     onError: console.error.bind(console, "unknown action:"),
     ignoreActions: ["EFFECT_TRIGGERED","EFFECT_RESOLVED", "@@router/UPDATE_LOCATION"],
 }
 
 const middlewareHelper = (tests, unformat) => (options = {}) => {
-    const { ignoreActions, checkPayloads, onError } = merge(defaultMiddlewareOptions, options)
+    const { ignoreActions, ignorePayloads, onError } = merge(defaultMiddlewareOptions, options)
     const ignoreMap = ignoreActions.reduce((obj, key) => { obj[key] = true; return obj }, {})
 
     const test = (action) => {
         const { type, payload } = unformat(action)
         if (ignoreMap[type]) { return }
-        if (tests[type] && !checkPayloads) { return }
+        if (tests[type] && ignorePayloads) { return }
         if (tests[type] && tests[type](payload)) { return }
         onError(action)
     }
