@@ -1,5 +1,5 @@
 const test = require("tape")
-const { types } = require("../src/index.js")
+const { types } = require("../dist/index.js")
 
 test("type checking", (t) => {
     const vals = [
@@ -46,7 +46,6 @@ test("enum type checking", (t) => {
     t.end()
 })
 
-// TODO
 test("one of type", (t) => {
     const vals = [
         null, undefined, false, "", 0, { a: 1, b: "b" }

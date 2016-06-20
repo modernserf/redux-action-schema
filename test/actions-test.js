@@ -1,5 +1,5 @@
 const test = require("tape")
-const { makeSchema, types } = require("../src/index.js")
+const { makeSchema, types } = require("../dist/index.js")
 
 test("makes action map", (t) => {
     const { actions } = makeSchema([

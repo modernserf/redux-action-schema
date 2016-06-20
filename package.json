@@ -4,8 +4,8 @@
   "description": "better action management for redux",
   "main": "dist/index.js",
   "scripts": {
-    "test": "node test/index.js | node_modules/.bin/faucet",
-    "build": "mkdir -p dist && node_modules/.bin/buble src/index.js > dist/index.js",
+    "test": "npm run build && node test/index.js | node_modules/.bin/faucet",
+    "build": "mkdir -p dist && node_modules/.bin/rollup -c",
     "prepublish": "npm run build",
     "deploy": "npm test && npm publish"
   },
@@ -26,6 +26,8 @@
     "buble": "^0.11.5",
     "faucet": "0.0.1",
     "redux": "^3.5.2",
+    "rollup": "^0.32.0",
+    "rollup-plugin-buble": "^0.11.0",
     "tape": "^4.5.1"
   }
 }

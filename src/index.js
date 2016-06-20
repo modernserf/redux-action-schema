@@ -1,105 +1,10 @@
-const types = (() => {
-    const t = {
-        Object: (val) =>
-            !!val && !Array.isArray(val) && typeof val === "object",
-        Number: (val) => typeof val === "number",
-        String: (val) => typeof val === "string",
-        Array: Array.isArray,
-        Any: (val) => val !== undefined && val !== null,
-    }
+export { types } from "./types.js"
 
-    const optional = (fn) => (val) =>
-        val === undefined || val === null || fn(val)
-
-    for (const key in t) {
-        t[key].optional = optional(t[key])
-    }
-
-    const tParams = {
-        OneOf: (opts) => (val) => opts.indexOf(val) !== -1,
-        ArrayOf: (typeFn) => (val) =>
-            Array.isArray(val) && !!val.every(typeFn),
-        OneOfType: function (...args) {
-            return (val) => args.some((test) => test(val))
-        }
-    }
-
-    for (const key in tParams) {
-        t[key] = tParams[key]
-        t[key].optional = (opts) => optional(tParams[key](opts))
-    }
-
-    return t
-})()
+import { middlewareHelper } from "./middleware"
+import { reducerHelper } from "./reducer"
+import { parseAction } from "./parse"
 
 const merge = (a, b) => Object.assign({}, a, b)
-const uncons = (array) => [array[0], array.slice(1)]
-
-const defaultMiddlewareOptions = {
-    ignorePayloads: false,
-    onError: console.error.bind(console, "unknown action:"),
-    ignoreActions: ["EFFECT_TRIGGERED","EFFECT_RESOLVED", "@@router/UPDATE_LOCATION"],
-}
-
-const middlewareHelper = (tests, unformat) => (options = {}) => {
-    const { ignoreActions, ignorePayloads, onError } = merge(defaultMiddlewareOptions, options)
-    const ignoreMap = ignoreActions.reduce((obj, key) => { obj[key] = true; return obj }, {})
-
-    const test = (action) => {
-        const { type, payload } = unformat(action)
-        if (ignoreMap[type]) { return }
-        if (tests[type] && ignorePayloads) { return }
-        if (tests[type] && tests[type](payload)) { return }
-        onError(action)
-    }
-
-    return () => (next) => (action) => {
-        test(action)
-        return next(action)
-    }
-}
-
-const reducerHelper = (actions, unformat) => (obj, initState) => {
-    const nObj = {}
-    for (const key in obj) {
-        const nKey = actions[key]
-        if (!nKey) { throw new Error(`unknown action: ${key}`) }
-        const fn = obj[key]
-        if (typeof fn !== "function") { throw new Error(`${key} is not a function`) }
-        nObj[nKey] = obj[key]
-    }
-
-    return (state = initState, action) => {
-        const { type, payload } = unformat(action)
-        return nObj[type]
-            ? nObj[type](state, payload, action)
-            : state
-    }
-}
-
-function parseAction (action) {
-    const [type, docAndArgs] = uncons(action)
-    if (!docAndArgs.length) { return { type, args: [], doc: "" } }
-
-    const hasDoc = types.String(docAndArgs[0])
-    if (hasDoc) {
-        const [doc, args] = uncons(docAndArgs)
-        return { type, doc, args: args.map(parseArg) }
-    }
-    return { type, doc: "", args: docAndArgs.map(parseArg) }
-}
-
-function parseArg (arg, i) {
-    if (typeof arg === "function" && i === 0) {
-        return { test: arg, doc: "", wholePayload: true }
-    }
-    if (arg.length === 3) {
-        const [id, doc, test] = arg
-        return { id, doc, test }
-    }
-    const [id, test] = arg
-    return { id, doc: "", test }
-}
 
 const defaultParams = {
     format: (type, payload) => ({ type, payload }),
@@ -107,7 +12,7 @@ const defaultParams = {
     namespace: "",
 }
 
-function makeSchema (schema, params = {}) {
+export function makeSchema (schema, params = {}) {
     const { format, unformat, namespace } = merge(defaultParams, params)
     const parsed = schema.map(parseAction)
 
@@ -174,5 +79,3 @@ function makeSchema (schema, params = {}) {
         actions, test, actionCreators,
     }
 }
-
-module.exports = { makeSchema, types }

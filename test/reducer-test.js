@@ -1,5 +1,5 @@
 const test = require("tape")
-const { makeSchema, types } = require("../src/index.js")
+const { makeSchema, types } = require("../dist/index.js")
 
 const merge = (a, b) => Object.assign({}, a, b)
 
