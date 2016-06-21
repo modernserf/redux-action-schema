@@ -1,10 +1,10 @@
 const test = require("tape")
-const { makeSchema, types } = require("../dist/index.js")
+const { createSchema, types } = require("../dist/index.js")
 
 const merge = (a, b) => Object.assign({}, a, b)
 
 test("create reducer", (t) => {
-    const { createReducer } = makeSchema([
+    const { createReducer } = createSchema([
         ["foo"],
         ["bar", types.String],
         ["baz", ["a", types.Number], ["b", types.Number]],
@@ -34,7 +34,7 @@ test("create reducer", (t) => {
 })
 
 test("throws when reducer created with unknown action", (t) => {
-    const { createReducer } = makeSchema([
+    const { createReducer } = createSchema([
         ["foo"],
     ])
 
@@ -48,7 +48,7 @@ test("throws when reducer created with unknown action", (t) => {
 })
 
 test("throws if reducer created with non-function", (t) => {
-    const { createReducer } = makeSchema([
+    const { createReducer } = createSchema([
         ["foo"],
         ["bar", types.String],
     ])
@@ -63,7 +63,7 @@ test("throws if reducer created with non-function", (t) => {
 })
 
 test("create namespaced reducer", (t) => {
-    const { createReducer } = makeSchema([
+    const { createReducer } = createSchema([
         ["foo"],
         ["bar", types.String],
     ], { namespace: "ns" })

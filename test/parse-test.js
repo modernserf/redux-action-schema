@@ -1,9 +1,9 @@
 const test = require("tape")
-const { makeSchema, types } = require("../dist/index.js")
+const { createSchema, types } = require("../dist/index.js")
 
 test("parses a valid schema", (t) => {
     try {
-        const { schema } = makeSchema([
+        const { schema } = createSchema([
             ["foo", "has no arguments"],
             ["bar"], // no docstring
             ["baz", "has single argument", types.String],

@@ -1,9 +1,9 @@
 const test = require("tape")
-const { makeSchema, types } = require("../dist/index.js")
+const { createSchema, types } = require("../dist/index.js")
 const { createStore, applyMiddleware } = require("redux")
 
 test("create middleware", (t) => {
-    const { createReducer, createMiddleware } = makeSchema([
+    const { createReducer, createMiddleware } = createSchema([
         ["foo"],
         ["bar", types.String],
     ])
@@ -43,7 +43,7 @@ test("create middleware", (t) => {
 })
 
 test("create middleware with unchecked payloads", (t) => {
-    const { createReducer, createMiddleware } = makeSchema([
+    const { createReducer, createMiddleware } = createSchema([
         ["foo"],
         ["bar", types.String],
     ])
@@ -81,7 +81,7 @@ test("create middleware with unchecked payloads", (t) => {
 })
 
 test("create middleware with ignored actions", (t) => {
-    const { createReducer, createMiddleware } = makeSchema([
+    const { createReducer, createMiddleware } = createSchema([
         ["foo"],
         ["bar", types.String],
     ])

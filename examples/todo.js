@@ -1,4 +1,4 @@
-import { types, makeSchema } from "redux-action-schema"
+import { types, createSchema } from "redux-action-schema"
 import { createStore, combineReducers, applyMiddleware } from "redux"
 
 const merge = (a, b) => Object.assign({}, a, b)
@@ -9,7 +9,7 @@ const show = ["all", "active", "completed"]
 
 const todoID = (value) => typeof value === "number" && value > 0
 
-const schema = makeSchema([
+const schema = createSchema([
     ["addTodo", "here is a docstring",
         ["id", todoID],
         ["text", types.String]],

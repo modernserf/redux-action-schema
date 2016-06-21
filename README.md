@@ -15,7 +15,7 @@ Redux Action Schema is a library for managing actions in Redux apps. It is a rep
     + [Middleware](#middleware)
 - [API Reference](#api-reference)
     + [types](#types)
-    + [makeSchema](#makeschema)
+    + [createSchema](#makeschema)
     + [actions](#actions)
     + [actionCreators](#actioncreators)
     + [createReducer](#createreducer)
@@ -60,7 +60,7 @@ const show = ["all", "active", "completed"]
 // types are functions that return true/false
 const todoID = (value) => typeof value === "number" && value > 0
 
-const schema = makeSchema([
+const schema = createSchema([
     ["addTodo", "here is a docstring",
         ["id", todoID],
         ["text", types.String]],
@@ -86,7 +86,7 @@ Protect against typos and automatically handle namespaces with generated actions
 schema.actions.addTodo // => "addTodo"
 schema.actions.adTodo  // => undefined
 
-const fooSchema = makeSchema([...], { namespace: "foo" })
+const fooSchema = createSchema([...], { namespace: "foo" })
 schema.actions.addTodo // => "foo_addTodo"
 ```
 
@@ -150,7 +150,7 @@ You may choose to use all these features at once, or mix and match -- you don't 
 # API Reference
 
 ```
-const { types, makeSchema } = import "redux-action-schema"
+const { types, createSchema } = import "redux-action-schema"
 ```
 
 ## types
@@ -179,17 +179,17 @@ types.ArrayOf.optional(types.Number) // matches [1,2,3], null, undefined
 types.ArrayOf(types.Number.optional) // matches [1, null, 3]
 ```
 
-## makeSchema
+## createSchema
 
 ```
-makeSchema(actions, [options])
+createSchema(actions, [options])
 ```
 
 ### Arguments
 
 - `actions` _(Array)_: A list of action definitions to validate against. See [next section](#action-definitions) for more on this.
 - `[options]` _(Object)_: Additional options for building the schema:
-    + `namespace` _(String)_: prefix for action type strings handled by this schema. For example, `schema = makeSchema(["foo"], { namespace: "ns"})` will use `schema.actions.foo` but expect actions like `{ type: "ns_foo" }`
+    + `namespace` _(String)_: prefix for action type strings handled by this schema. For example, `schema = createSchema(["foo"], { namespace: "ns"})` will use `schema.actions.foo` but expect actions like `{ type: "ns_foo" }`
 
 ### Returns
 

@@ -1,8 +1,8 @@
 const test = require("tape")
-const { makeSchema, types } = require("../dist/index.js")
+const { createSchema, types } = require("../dist/index.js")
 
 test("makes action map", (t) => {
-    const { actions } = makeSchema([
+    const { actions } = createSchema([
         ["foo"],
         ["bar"],
         ["baz"],
@@ -12,8 +12,8 @@ test("makes action map", (t) => {
     t.end()
 })
 
-test("makes action map with namespace", (t) => {
-    const { actions } = makeSchema([
+test("makes action map with namespace string", (t) => {
+    const { actions } = createSchema([
         ["foo"],
         ["bar"],
         ["baz"],
@@ -25,10 +25,32 @@ test("makes action map with namespace", (t) => {
     t.end()
 })
 
-test.skip("throws on invalid namespace")
+test("makes action map with namespace func", (t) => {
+    const { actions } = createSchema([
+        ["foo"],
+        ["bar"],
+        ["baz"],
+    ], { namespace: (t) => `ns_${t}` })
+
+    t.deepEquals(actions, {
+        foo: "ns_foo", bar: "ns_bar", baz: "ns_baz",
+    })
+    t.end()
+})
+
+test("throws on namespace collision", (t) => {
+    t.throws(() => {
+        createSchema([
+            ["foo"],
+            ["bar"],
+            ["baz"],
+        ], { namespace: (t) => "same" })
+    })
+    t.end()
+})
 
 test("makes action creators", (t) => {
-    const { actionCreators } = makeSchema([
+    const { actionCreators } = createSchema([
         ["foo"],
         ["bar", types.String],
         ["baz", ["a", types.Number], ["b", types.Number]],
@@ -43,7 +65,7 @@ test("makes action creators", (t) => {
 })
 
 test("makes positional argument action creators", (t) => {
-    const { actionCreators: ac } = makeSchema([
+    const { actionCreators: ac } = createSchema([
         ["foo"],
         ["bar", types.String],
         ["baz", ["a", types.Number], ["b", types.Number]],
@@ -62,7 +84,7 @@ test("makes action creators with alternate format", (t) => {
         ? [type]
         : [type, payload]
     const unformat = ([type, payload]) => ({ type, payload })
-    const { actionCreators: ac } = makeSchema([
+    const { actionCreators: ac } = createSchema([
         ["foo"],
         ["bar", types.String],
         ["baz", ["a", types.Number], ["b", types.Number]],
@@ -76,7 +98,7 @@ test("makes action creators with alternate format", (t) => {
 })
 
 test("makes namespaced action creators", (t) => {
-    const { actionCreators: ac } = makeSchema([
+    const { actionCreators: ac } = createSchema([
         ["foo"],
         ["bar", types.String],
         ["baz", ["a", types.Number], ["b", types.Number]],
@@ -92,7 +114,7 @@ test("makes namespaced action creators", (t) => {
 })
 
 test("tests actions for validity", (t) => {
-    const { test: testAction } = makeSchema([
+    const { test: testAction } = createSchema([
         ["foo"],
         ["bar", types.String],
         ["baz", ["a", types.Number], ["b", types.Number]],

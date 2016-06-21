@@ -9,27 +9,31 @@ const merge = (a, b) => Object.assign({}, a, b)
 const defaultParams = {
     format: (type, payload) => ({ type, payload }),
     unformat: (action) => action,
-    namespace: "",
+    namespace: (t) => t,
 }
 
-// TODO: combineSchema
-// TODO: namespace takes fn
-
-export function makeSchema (schema, params = {}) {
+export function createSchema (schema, params = {}) {
     const { format, unformat, namespace } = merge(defaultParams, params)
     const parsed = schema.map(parseAction)
+
+    const nsFunc = typeof namespace === "string"
+        ? (t) => `${namespace}_${t}`
+        : namespace
 
     const schemaMap = parsed.reduce((obj, action) => {
         obj[action.type] = action
         return obj
     }, {})
 
+    const values = {}
+
     // action type -> namespaced action type
     const actions = parsed.reduce((obj, { type }) => {
-        const nType = namespace
-            ? namespace + "_" + type
-            : type
-        obj[type] = nType
+        obj[type] = nsFunc(type)
+        if (values[obj[type]]) {
+            throw new Error("multiple actions with the same type")
+        }
+        values[obj[type]] = true
         return obj
     }, {})
 
