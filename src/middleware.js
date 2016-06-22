@@ -13,6 +13,8 @@ export const middlewareHelper = (tests, unformat) => (options = {}) => {
     const ignoreMap = ignoreActions.reduce((obj, key) => { obj[key] = true; return obj }, {})
 
     const test = (action) => {
+        if (typeof action !== "object") { return }
+
         const { type, payload } = unformat(action)
         if (ignoreMap[type]) { return }
         if (tests[type] && ignorePayloads) { return }

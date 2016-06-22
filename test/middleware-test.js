@@ -1,6 +1,7 @@
 const test = require("tape")
 const { createSchema, types } = require("../dist/index.js")
 const { createStore, applyMiddleware } = require("redux")
+const thunk = require("redux-thunk").default
 
 test("create middleware", (t) => {
     const { createReducer, createMiddleware } = createSchema([
@@ -108,6 +109,37 @@ test("create middleware with ignored actions", (t) => {
     })
     t.doesNotThrow(() => {
         store.dispatch({ type: "baz" })
+    })
+    t.end()
+})
+
+test("doesn't interfere with redux-thunk", (t) => {
+    const { createReducer, createMiddleware } = createSchema([
+        ["foo"],
+        ["bar", types.String],
+    ])
+
+    const initState = { count: 0, message: "hello" }
+
+    const reducer = createReducer({
+        foo: (state) => state,
+        bar: (state) => state,
+    }, initState)
+
+    const middleware = createMiddleware({
+        onError: () => { throw new Error("unknown action") },
+    })
+
+    const asyncAction = (dispatch) => {
+        dispatch({ type: "foo" })
+    }
+
+    const store = createStore(
+        reducer,
+        applyMiddleware(middleware, thunk))
+
+    t.doesNotThrow(() => {
+        store.dispatch(asyncAction)
     })
     t.end()
 })
