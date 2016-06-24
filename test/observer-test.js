@@ -267,8 +267,6 @@ test("print schema", (t) => {
         { type: "xyzzy", payload: { a: 123, b: "foo" } },
     ].forEach((action) => store.dispatch(action))
 
-    t.comment(o.schemaDefinitionString())
-
     t.equals(o.schemaDefinitionString(), `
 createSchema([
     ["foo"],
