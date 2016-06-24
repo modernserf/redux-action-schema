@@ -1,6 +1,7 @@
 const { types, createSchema } = require("redux-action-schema")
 const { createStore, combineReducers, applyMiddleware } = require("redux")
-const thunk = require("redux-thunk").default
+const { default: createSagaMiddleware, takeLatest } = require("redux-saga")
+const { call, select, put, fork } = require("redux-saga/effects")
 
 const api = {
     load: () => window.fetch("/todos").then((res) => res.json()),
@@ -15,24 +16,27 @@ const schema = createSchema([
         ["id", types.Number],
         ["text", types.String]],
     ["toggleTodo", types.Number],
-    ["loadTodos", types.Array]])
+    ["saveTodos"],
+    ["loadTodos"],
+    ["loadTodosResolved", types.Array]])
 
-// save the original synchronous action creator for loadTodos
-const { loadTodos } = schema.actionCreators
+// sagas
+const loadSaga = takeLatest(schema.actions.loadTodos, function * () {
+    const data = yield call(api.load)
+    yield put(schema.actionCreators.loadTodosResolved(data))
+})
 
-// replace it in the actionCreators object with a thunk-producing action creator
-schema.actionCreators.loadTodos = () => (dispatch) => {
-    api.load().then((todos) => {
-        // call the _original_ action creator to create an action
-        dispatch(loadTodos(todos))
-    })
+const saveSaga = takeLatest(schema.actions.saveTodos, function * () {
+    const { todos } = yield select()
+    yield call(api.save, todos)
+})
+
+function * rootSaga () {
+    yield fork(loadSaga)
+    yield fork(saveSaga)
 }
 
-// note -- there is no corresponding "saveTodos" action
-schema.actionCreators.saveTodos = () => (dispatch, getState) => {
-    api.save(getState().todos)
-}
-
+// reducers
 const merge = (a, b) => Object.assign({}, a, b)
 
 const update = (state, id, updateFn) =>
@@ -45,7 +49,7 @@ const todoReducer = schema.createReducer({
         state.concat([{ id, text, completed: false }]),
     toggleTodo: (state, id) => update(state, id,
         (todo) => merge(todo, { completed: !todo.completed })),
-    loadTodos: (_, todos) => todos,
+    loadTodosResolved: (_, todos) => todos,
 }, [])
 
 const visibilityReducer = schema.createReducer({
@@ -57,8 +61,13 @@ const mainReducer = combineReducers({
     visibility: visibilityReducer,
 })
 
+// store
+const sagaMiddleware = createSagaMiddleware()
+
 const store = createStore(
     mainReducer,
-    applyMiddleware(thunk, schema.createMiddleware()))
+    applyMiddleware(sagaMiddleware, schema.createMiddleware()))
+
+sagaMiddleware.run(rootSaga)
 
 module.exports = { store, schema }

@@ -1,5 +1,7 @@
-export { types } from "./types.js"
+export { types } from "./types"
+export { createSchemaObserver } from "./schema-observer"
 
+import { testArgs } from "./types"
 import { middlewareHelper } from "./middleware"
 import { reducerHelper } from "./reducer"
 import { parseAction } from "./parse"
@@ -65,11 +67,7 @@ export function createSchema (schema, params = {}) {
         } else if (args.length === 1 && args[0].wholePayload) {
             obj[nType] = args[0].test
         } else {
-            obj[nType] = (payload) =>
-                payload &&
-                typeof payload === "object" &&
-                args.every(({ id, test }) => test(payload[id])) &&
-                Object.keys(payload).length === args.length
+            obj[nType] = testArgs(args)
         }
         return obj
     }, {})

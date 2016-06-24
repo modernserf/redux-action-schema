@@ -16,7 +16,9 @@ const optional = (fn) => (val) =>
     val === undefined || val === null || fn(val)
 
 for (const key in types) {
+    types[key]._typeName = key
     types[key].optional = optional(types[key])
+    types[key].optional._typeName = `${key}.optional`
 }
 
 const tParams = {
@@ -36,3 +38,9 @@ for (const key in tParams) {
     types[key] = tParams[key]
     types[key].optional = compose(optional, tParams[key])
 }
+
+export const testArgs = (args) => (payload) =>
+    payload &&
+        typeof payload === "object" &&
+        args.every(({ id, test }) => test(payload[id])) &&
+        Object.keys(payload).length === args.length
