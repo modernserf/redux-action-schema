@@ -12,6 +12,17 @@ test("makes action map", (t) => {
     t.end()
 })
 
+test("uses default namespace if namespace undefined", (t) => {
+    const { actions } = createSchema([
+        ["foo"],
+        ["bar"],
+        ["baz"],
+    ], { namespace: undefined })
+
+    t.deepEquals(actions, { foo: "foo", bar: "bar", baz: "baz" })
+    t.end()
+})
+
 test("makes action map with namespace string", (t) => {
     const { actions } = createSchema([
         ["foo"],

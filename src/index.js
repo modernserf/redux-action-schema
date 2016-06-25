@@ -5,8 +5,7 @@ import { testArgs } from "./types"
 import { middlewareHelper } from "./middleware"
 import { reducerHelper } from "./reducer"
 import { parseAction } from "./parse"
-
-const merge = (a, b) => Object.assign({}, a, b)
+import { mergeIgnoreUndefined } from "./util"
 
 const defaultParams = {
     format: (type, payload) => ({ type, payload }),
@@ -15,7 +14,7 @@ const defaultParams = {
 }
 
 export function createSchema (schema, params = {}) {
-    const { format, unformat, namespace } = merge(defaultParams, params)
+    const { format, unformat, namespace } = mergeIgnoreUndefined(defaultParams, params)
     const parsed = schema.map(parseAction)
 
     const nsFunc = typeof namespace === "string"
