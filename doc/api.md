@@ -49,11 +49,13 @@ createSchema(actions, [options])
 
 - `actions` _(Array)_: A list of action definitions to validate against. See [next section](#action-definitions) for more on this.
 - `[options]` _(Object)_: Additional options for building the schema:
-    + `namespace` _(String)_: prefix for action type strings handled by this schema. For example, `schema = createSchema(["foo"], { namespace: "ns"})` will use `schema.actions.foo` but expect actions like `{ type: "ns_foo" }`
+    + `namespace` (_String_ | `(String) => String`): rewrite action type strings handled by this schema.
+        * The function form takes an action name and returns a modified action name: `schema = createSchema(["foo"], { namespace: (type) => type.toUpperCase() })` will use `schema.actions.foo` but expect actions like `{ type: "FOO" }`.
+        * The string form prepends that string with an underscore to the original action name: `schema = createSchema(["foo"], { namespace: "ns"})` will use `schema.actions.foo` but expect actions like `{ type: "ns_foo" }`.
 
 ### Returns
 
-(){ [actions](#actions), [actionCreators](#actioncreators), [createReducer](#createreducer), [createMiddleware](#createmiddleware) } = : a collection of objects and functions for working with and validating actions.
+({ [actions](#actions), [actionCreators](#actioncreators), [createReducer](#createreducer), [createMiddleware](#createmiddleware) }) = : a collection of objects and functions for working with and validating actions.
 
 
 ## Action definitions
