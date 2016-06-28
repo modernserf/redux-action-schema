@@ -1,6 +1,7 @@
 export { types } from "./types"
 export { createSchemaObserver } from "./schema-observer"
 
+import { duplicateActionError } from "./errors"
 import { testArgs } from "./types"
 import { middlewareHelper } from "./middleware"
 import { reducerHelper } from "./reducer"
@@ -32,7 +33,7 @@ export function createSchema (schema, params = {}) {
     const actions = parsed.reduce((obj, { type }) => {
         obj[type] = nsFunc(type)
         if (values[obj[type]]) {
-            throw new Error("multiple actions with the same type")
+            throw duplicateActionError(type)
         }
         values[obj[type]] = true
         return obj
