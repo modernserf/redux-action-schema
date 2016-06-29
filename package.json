@@ -1,6 +1,6 @@
 {
   "name": "redux-action-schema",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "better action management for redux",
   "main": "dist/index.js",
   "scripts": {
