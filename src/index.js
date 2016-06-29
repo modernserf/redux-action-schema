@@ -1,7 +1,7 @@
 export { types } from "./types"
 export { createSchemaObserver } from "./schema-observer"
 
-import { duplicateActionError } from "./errors"
+import { duplicateActionError, namespaceError } from "./errors"
 import { testArgs } from "./types"
 import { middlewareHelper } from "./middleware"
 import { reducerHelper } from "./reducer"
@@ -18,9 +18,14 @@ export function createSchema (schema, params = {}) {
     const { format, unformat, namespace } = mergeIgnoreUndefined(defaultParams, params)
     const parsed = schema.map(parseAction)
 
-    const nsFunc = typeof namespace === "string"
-        ? (t) => `${namespace}_${t}`
-        : namespace
+    const nsFunc = (() => {
+        if (typeof namespace === "function") {
+            return namespace
+        } else if (typeof namespace === "string") {
+            return (t) => `${namespace}_${t}`
+        }
+        throw namespaceError
+    })()
 
     const schemaMap = parsed.reduce((obj, action) => {
         obj[action.type] = action

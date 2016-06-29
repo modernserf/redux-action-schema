@@ -49,6 +49,17 @@ test("makes action map with namespace func", (t) => {
     t.end()
 })
 
+test("throws on invalid namespace parameter", (t) => {
+    t.throws(() => {
+        createSchema([
+            ["foo"],
+            ["bar"],
+            ["baz"],
+        ], { namespace: { foo: "bar" } })
+    })
+    t.end()
+})
+
 test("throws on namespace collision", (t) => {
     t.throws(() => {
         createSchema([
