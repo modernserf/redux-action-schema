@@ -1,5 +1,8 @@
+/index.js
+/connector.js
+/types.js
+
 .DS_Store
-dist
 
 # Logs
 logs

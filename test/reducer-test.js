@@ -1,14 +1,17 @@
 const test = require("tape")
-const { createSchema, types } = require("../dist/index.js")
+const {
+    createActions, createReducerCreator, types,
+    createSelectors, createRootReducer, reducer, selector,
+} = require("../index.js")
 
 const merge = (a, b) => Object.assign({}, a, b)
 
 test("create reducer", (t) => {
-    const { createReducer } = createSchema([
+    const createReducer = createReducerCreator(createActions([
         ["foo"],
         ["bar", types.String],
         ["baz", ["a", types.Number], ["b", types.Number]],
-    ])
+    ]))
 
     const initState = { count: 0, message: "hello" }
 
@@ -34,9 +37,9 @@ test("create reducer", (t) => {
 })
 
 test("throws when reducer created with unknown action", (t) => {
-    const { createReducer } = createSchema([
+    const createReducer = createReducerCreator(createActions([
         ["foo"],
-    ])
+    ]))
 
     t.throws(() => {
         createReducer({
@@ -48,10 +51,10 @@ test("throws when reducer created with unknown action", (t) => {
 })
 
 test("throws if reducer created with non-function", (t) => {
-    const { createReducer } = createSchema([
+    const createReducer = createReducerCreator(createActions([
         ["foo"],
         ["bar", types.String],
-    ])
+    ]))
 
     t.throws(() => {
         createReducer({
@@ -63,10 +66,10 @@ test("throws if reducer created with non-function", (t) => {
 })
 
 test("create namespaced reducer", (t) => {
-    const { createReducer } = createSchema([
+    const createReducer = createReducerCreator(createActions([
         ["foo"],
         ["bar", types.String],
-    ], { namespace: "ns" })
+    ], { mapActionType: (type) => `ns_${type}` }))
 
     const initState = { count: 0, message: "hello" }
 
@@ -80,5 +83,43 @@ test("create namespaced reducer", (t) => {
         reducer(initState, { type: "ns_foo" }))
     t.deepEquals({ count: 0, message: "world" },
         reducer(initState, { type: "ns_bar", payload: "world" }))
+    t.end()
+})
+
+test("createRootReducer", (t) => {
+    const actions = createActions([
+        ["foo"],
+        ["bar", types.String],
+        ["baz", ["a", types.Number], ["b", types.Number]],
+    ])
+
+    const selectors = createSelectors([
+        ["quux", (state = "") => state],
+        ["plugh", reducer({
+            foo: ({ a, b }) => ({ a: +1, b: +1 }),
+            baz: (_, { a, b }) => ({ a, b }),
+        }, { a: 0, b: 0 })],
+        ["xyzzy", selector(
+            ["quux", "plugh"],
+            ({ quux, plugh }) => ({ quux, a: plugh.a }))],
+    ])
+
+    const rootReducer = createRootReducer(actions, selectors)
+
+    const initState = rootReducer(undefined, { type: "@@init" })
+
+    t.deepEquals(initState, {
+        quux: "",
+        plugh: { a: 0, b: 0 },
+    })
+
+    t.deepEquals(selectors.quux(initState), "")
+    t.deepEquals(selectors.plugh(initState), { a: 0, b: 0 })
+    t.deepEquals(selectors.xyzzy(initState), { quux: "", a: 0 })
+
+    const nextState = rootReducer(initState, actions.foo())
+    t.deepEquals(selectors.plugh(nextState), { a: 1, b: 1 })
+    t.deepEquals(selectors.xyzzy(nextState), { quux: "", a: 1 })
+
     t.end()
 })
