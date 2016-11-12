@@ -1,8 +1,8 @@
-export { types } from "./types"
+export { types } from "./types/index.js"
 export { createSchemaObserver } from "./schema-observer"
 
 import { duplicateActionError, namespaceError } from "./errors"
-import { testArgs } from "./types"
+// import { testArgs } from "./types/index.js"
 import { middlewareHelper } from "./middleware"
 import { reducerHelper } from "./reducer"
 import { parseAction } from "./parse"
@@ -72,7 +72,7 @@ export function createSchema (schema, params = {}) {
         } else if (args.length === 1 && args[0].wholePayload) {
             obj[nType] = args[0].test
         } else {
-            obj[nType] = testArgs(args)
+            // obj[nType] = testArgs(args)
         }
         return obj
     }, {})

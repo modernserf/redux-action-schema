@@ -1,9 +1,9 @@
-import { types, testArgs } from "./types"
+import { types } from "./types/index"
 
 const nullType = (val) => val === undefined || val === null
 
 // not perfect, but probably sufficient
-const pojo = (obj) => obj && obj.constructor === Object
+// const pojo = (obj) => obj && obj.constructor === Object
 
 const basicTypes = [
     nullType, types.String, types.Number, types.Boolean, types.Array, types.Object,
@@ -74,11 +74,11 @@ function findType (payloads) {
 }
 
 function guess (payload, depth = 0) {
-    if (!depth && pojo(payload)) {
-        const args = Object.keys(payload)
-            .map((key) => ({ id: key, test: guess(payload[key], 1).test }))
-        return { args, test: testArgs(args) }
-    }
+    // if (!depth && pojo(payload)) {
+        // const args = Object.keys(payload)
+            // .map((key) => ({ id: key, test: guess(payload[key], 1).test }))
+        // return { args, test: testArgs(args) }
+    // }
 
     for (let i = 0; i < basicTypes.length; i++) {
         if (basicTypes[i](payload)) { return { test: basicTypes[i] } }

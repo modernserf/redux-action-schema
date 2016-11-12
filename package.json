@@ -4,7 +4,7 @@
   "description": "better action management for redux",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "node_modules/.bin/eslint --ignore-pattern dist/ .",
+    "lint": "node_modules/.bin/eslint --ignore-pattern dist/ --ignore-pattern examples/  .",
     "tape": "npm run build && node test/index.js | node_modules/.bin/faucet",
     "test": "npm run lint && npm run tape",
     "build": "mkdir -p dist && node_modules/.bin/rollup -c",

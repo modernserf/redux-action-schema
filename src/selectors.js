@@ -1,16 +1,17 @@
-import { combineReducers } from 'redux'
+import { combineReducers } from "redux"
+import { connect } from "react-redux"
 
-export function createSchema (specs) {
+export function createSelectorSchema (specs) {
     // TODO: handle types
     const specMap = specs.reduce((m, [key, ...rest]) => {
         m[key] = rest; return m
     }, {})
     return {
-        createReducer: createReducer(specMap),
+        createRootReducer: createRootReducer(specMap),
     }
 }
 
-function createReducer (schema) {
+function createRootReducer (schema) {
     return function (reducers) {
         const baseReducers = {}
         const selectors = {}
@@ -27,7 +28,7 @@ function createReducer (schema) {
             const reducer = reducers[key]
 
             // plain reducer
-            if (typeof reducer === 'function') {
+            if (typeof reducer === "function") {
                 baseReducers[key] = reducer
                 selectors[key] = (state) => state[key]
                 continue
@@ -61,14 +62,52 @@ function createDepsSelector (deps, selectors) {
 const id = (x) => x
 
 function createSelect (selectors) {
-    return function (deps, mapper = id) {
-        return mapper(createDepsSelector(deps, selectors))
+    return function select (deps, mapper = id) {
+        const selector = createDepsSelector(deps, selectors)
+        return (state) => mapper(selector(state))
     }
 }
 
 function splitEnd (arr) {
     return [
-        arr.slice(0, arr.length - 2),
+        arr.slice(0, arr.length - 1),
         arr[arr.length - 1],
     ]
+}
+
+export function createConnector (actionSchema, select) {
+    return (selections, actions, merge) => {
+        const selector = Array.isArray(selections)
+            ? select(selections)
+            : selectAndRename(select, selections)
+
+        const boundActions = Array.isArray(actions)
+            ? pick(actionSchema.actionCreators, actions)
+            : pickAndRename(actionSchema.actionCreators, actions)
+
+        return merge
+            ? connect(selector, boundActions, merge)
+            : connect(selector, boundActions)
+    }
+}
+
+function pickAndRename (source, nameMap) {
+    const res = {}
+    for (const key in nameMap) { // eslint-disable-line guard-for-in
+        const nextKey = nameMap[key]
+        res[nextKey] = source[key]
+    }
+    return res
+}
+
+function pick (source, names) {
+    const res = {}
+    for (var i = 0; i < names.length; i++) {
+        res[names[i]] = source[names[i]]
+    }
+    return res
+}
+
+function selectAndRename (select, nameMap) {
+    return select(Object.keys(nameMap), (data) => pickAndRename(data, nameMap))
 }

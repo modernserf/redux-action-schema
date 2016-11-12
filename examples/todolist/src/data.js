@@ -1,7 +1,7 @@
-import { createConnector } from 'redux-schema'
+import { createConnector } from "redux-schema"
 import {
     selectorSchema, actionSchema, Status, TodoFragment,
-} from './schema'
+} from "./schema"
 
 const statusFilter = actionSchema.createReducer({
     routeChanged: (state, { query }) =>
@@ -10,7 +10,7 @@ const statusFilter = actionSchema.createReducer({
 }, Status.all)
 
 const tagFilter = actionSchema.createReducer({
-    routeChanged: (state, { query }) => (query.tags || '').split(','),
+    routeChanged: (state, { query }) => (query.tags || "").split(","),
     setTagFilter: (state, tag) => [tag],
     addedTagFilter: (state, tag) => state.concat([tag]),
     removedTagFilter: (state, tag) => state.filter((t) => t !== tag),
@@ -31,16 +31,16 @@ const path = actionSchema.createReducer({
     routeChanged: (state, { path }) => path,
 }, [])
 
-const route = ['statusFilter', 'tagFilter', 'path',
+const route = ["statusFilter", "tagFilter", "path",
     ({ statusFilter, tagFilter, path }) => ({
         path,
         query: {
             status: statusFilter,
-            tags: tagFilter.join(','),
+            tags: tagFilter.join(","),
         },
     })]
 
-const filteredTodos = ['statusFilter', 'tagFilter', 'todos',
+const filteredTodos = ["statusFilter", "tagFilter", "todos",
     ({ statusFilter, tagFilter, todos }) => {
         const tagSet = new Set(tagFilter)
         const hasTag = tagFilter.length
@@ -68,17 +68,17 @@ const reducer = selectorSchema.createReducer({
 // reducer is a function with a 'select' method glued on it
 
 // create an anonymous selector
-reducer.select(['filteredTodos', 'route'])
+reducer.select(["filteredTodos", "route"])
 // ==> (appState) => ({ filteredTodos, route })
 // and map
-reducer.select(['filteredTodos', 'route'], (selections) => value)
+reducer.select(["filteredTodos", "route"], (selections) => value)
 // ==> (appState) => value
 
 const connect = createConnector({ selectors, actions })
 
 connect(
-    ['filteredTodos', 'tags'],
-    ['setTagFilter', 'addedTagFilter', 'removedTagFilter'],
+    ["filteredTodos", "tags"],
+    ["setTagFilter", "addedTagFilter", "removedTagFilter"],
     (selections, actionCreators, props) => value
 )(Component)
 
@@ -91,7 +91,7 @@ function toggleStatus (status) {
 
 function parseTodo (todo) {
     const parsed = todo.text.split(/(#\w+)/g).map((t) => {
-        if (t[0] === '#' && t[1]) {
+        if (t[0] === "#" && t[1]) {
             return TodoFragment.tag.create(t.substr(1))
         } else {
             return TodoFragment.text.create(t)
@@ -99,7 +99,7 @@ function parseTodo (todo) {
     })
 
     const tags = parsed.reduce((coll, { type, value }) => {
-        if (type === 'tag') { coll.add(value) }
+        if (type === "tag") { coll.add(value) }
         return coll
     }, new Set())
 
