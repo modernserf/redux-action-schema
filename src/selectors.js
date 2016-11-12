@@ -1,113 +1,94 @@
-import { combineReducers } from "redux"
-import { connect } from "react-redux"
+import shallowequal from "shallowequal"
+import { types } from "./types/index"
+import { keyBy, id } from "./util"
+import { duplicateSelectorError, unknownSelectorError } from "./errors"
 
-export function createSelectorSchema (specs) {
-    // TODO: handle types
-    const specMap = specs.reduce((m, [key, ...rest]) => {
-        m[key] = rest; return m
-    }, {})
-    return {
-        createRootReducer: createRootReducer(specMap),
-    }
+export function createSelectors (specs, { mapSelectorName } = {}) {
+    const fields = buildFields(specs)
+    const selectors = {}
+    const selectorArr = fields.map(
+        createSelector(mapSelectorName, selectors))
+
+    Object.assign(
+        selectors,
+        keyBy(selectorArr, ({ name }) => name, duplicateSelectorError))
+    return selectors
 }
 
-function createRootReducer (schema) {
-    return function (reducers) {
-        const baseReducers = {}
-        const selectors = {}
+const Selector = types.Variant([
+    ["plainReducer",
+        ["reducer", types.Function]],
+    ["reducerMap",
+        ["initState", types.Any],
+        ["reducers", types.Object]],
+    ["selector",
+        ["dependencies", types.ArrayOf(types.String)],
+        ["selector", types.Function]],
+])
 
-        for (const key in schema) {
-            if (!reducers[key]) {
-                throw new Error(`Unknown selector ${key}`)
-            }
+export function selector (dependencies, selector) {
+    return Selector.creators.selector({ dependencies, selector })
+}
+
+export function reducer (reducers, initState) {
+    return Selector.creators.reducerMap({ reducers, initState })
+}
+
+const SelectorDef = types.Record([
+    ["name", types.String],
+    ["doc", types.String, "optional"],
+    ["selector", types.OneOfType([
+        types.Function, // raw reducer
+        Selector,
+    ])],
+])
+
+function buildFields (baseFields) {
+    // TODO throw error on invalid definition
+    return baseFields.map((def) => {
+        const field = SelectorDef.toObject(def)
+        if (typeof field.selector === "function") {
+            field.selector = Selector.creators.plainReducer({
+                reducer: field.selector,
+            })
         }
-        for (const key in reducers) {
-            if (!schema[key]) {
-                throw new Error(`Selector "${key}" not in schema`)
+        return field
+    })
+}
+
+function createSelector (field, mapName = id, allSelectors) {
+    const name = mapName(field.name)
+    const { payload } = field.selector
+    const selector = ({
+        plainReducer: (state) => state[name],
+        reducerMap: (state) => state[name],
+        selector: createDepsSelector(
+            payload.dependencies,
+            payload.selector,
+            allSelectors),
+    })[field.selector.type]
+
+    selector.name = name
+    selector.field = field
+    return selector
+}
+
+export function createDepsSelector (dependencies, fn, allSelectors) {
+    let lastDeps
+    let lastValue
+    return (state) => {
+        const deps = dependencies.reduce((coll, dep) => {
+            if (!allSelectors[dep]) {
+                throw unknownSelectorError(dep)
             }
-            const reducer = reducers[key]
+            coll[dep] = allSelectors[dep](state)
+            return coll
+        }, {})
 
-            // plain reducer
-            if (typeof reducer === "function") {
-                baseReducers[key] = reducer
-                selectors[key] = (state) => state[key]
-                continue
-            }
+        if (shallowequal(deps, lastDeps)) { return lastValue }
 
-            // selector
-            const [deps, fn] = splitEnd(reducer)
-            const selectDeps = createDepsSelector(deps, selectors)
-            selectors[key] = (state) => fn(selectDeps(state))
-        }
-
-        const mainReducer = combineReducers(baseReducers)
-
-        const select = createSelect(selectors)
-        mainReducer.select = select
-        return mainReducer
+        lastDeps = deps
+        lastValue = fn(deps)
+        return lastValue
     }
-}
-
-// TODO: memo
-function createDepsSelector (deps, selectors) {
-    return (state) => deps.reduce((coll, dep) => {
-        if (!selectors[dep]) {
-            throw new Error(`Unknown selector ${dep}`)
-        }
-        coll[dep] = selectors[dep](state)
-        return coll
-    }, {})
-}
-
-const id = (x) => x
-
-function createSelect (selectors) {
-    return function select (deps, mapper = id) {
-        const selector = createDepsSelector(deps, selectors)
-        return (state) => mapper(selector(state))
-    }
-}
-
-function splitEnd (arr) {
-    return [
-        arr.slice(0, arr.length - 1),
-        arr[arr.length - 1],
-    ]
-}
-
-export function createConnector (actionSchema, select) {
-    return (selections, actions, merge) => {
-        const selector = Array.isArray(selections)
-            ? select(selections)
-            : selectAndRename(select, selections)
-
-        const boundActions = Array.isArray(actions)
-            ? pick(actionSchema.actionCreators, actions)
-            : pickAndRename(actionSchema.actionCreators, actions)
-
-        return merge
-            ? connect(selector, boundActions, merge)
-            : connect(selector, boundActions)
-    }
-}
-
-function pickAndRename (source, nameMap) {
-    const res = {}
-    for (const key in nameMap) { // eslint-disable-line guard-for-in
-        const nextKey = nameMap[key]
-        res[nextKey] = source[key]
-    }
-    return res
-}
-
-function pick (source, names) {
-    const res = {}
-    for (var i = 0; i < names.length; i++) {
-        res[names[i]] = source[names[i]]
-    }
-    return res
-}
-
-function selectAndRename (select, nameMap) {
-    return select(Object.keys(nameMap), (data) => pickAndRename(data, nameMap))
 }

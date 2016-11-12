@@ -1,5 +1,0 @@
-require("./actions-test.js")
-require("./reducer-test.js")
-require("./middleware-test.js")
-require("./types-test.js")
-// require("./observer-test.js")

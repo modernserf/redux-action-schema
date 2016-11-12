@@ -169,3 +169,46 @@ test("Shape", (t) => {
 })
 
 test.skip("ExactShape")
+
+test("Variant", (t) => {
+    const Maybe = types.Variant([
+        ["just", types.Any],
+        ["nothing"],
+    ])
+
+    t.deepEquals(Maybe.creators.just("value"), {
+        type: "just", payload: "value",
+    })
+    t.deepEquals(Maybe.creators.nothing(), { type: "nothing" })
+
+    const { creators } = types.Variant([
+        ["foo"],
+        ["bar", types.String],
+        ["baz", "has a comment",
+            ["a", types.Number],
+            ["b", types.Number]],
+    ])
+
+    t.deepEquals(creators.foo(), { type: "foo" })
+    t.deepEquals(creators.bar("value"), {
+        type: "bar", payload: "value",
+    })
+    t.deepEquals(creators.baz({ a: 10, b: 20 }),
+        { type: "baz", payload: { a: 10, b: 20 } })
+
+    t.end()
+})
+
+test("Variant mapping", (t) => {
+    const { creators } = types.Variant([
+        ["foo"],
+        ["bar", types.String],
+    ], { mapType: (type) => "namespace/" + type })
+
+    t.deepEquals(creators.foo(), { type: "namespace/foo" })
+    t.deepEquals(creators.bar("value"), {
+        type: "namespace/bar", payload: "value",
+    })
+
+    t.end()
+})

@@ -17,6 +17,8 @@ export function createActionMonitor (actions, {
         if (!mergedActions[action.type]) {
             if (onUnknownAction) { onUnknownAction(action) }
         } else if (onMismatchedPayload) {
+            // TODO: use Action(schema).test?
+
             const { payloadType } = mergedActions[action.type].field
 
             if ((action.payload && !payloadType) ||

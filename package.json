@@ -4,10 +4,10 @@
   "description": "better action management for redux",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "node_modules/.bin/eslint --ignore-pattern dist/ --ignore-pattern examples/  .",
-    "tape": "npm run build && node test/index.js | node_modules/.bin/faucet",
+    "lint": "eslint --ignore-pattern dist/ --ignore-pattern examples/  .",
+    "tape": "npm run build && tape test/**.js | faucet",
     "test": "npm run lint && npm run tape",
-    "build": "mkdir -p dist && node_modules/.bin/rollup -c",
+    "build": "mkdir -p dist && rollup -c",
     "prepublish": "npm run build",
     "deploy": "npm test && npm publish"
   },
@@ -31,6 +31,8 @@
     "eslint-plugin-promise": "^1.3.2",
     "eslint-plugin-standard": "^1.3.2",
     "faucet": "0.0.1",
+    "react": "^15.3.2",
+    "react-redux": "^4.4.5",
     "redux": "^3.5.2",
     "redux-saga": "^0.10.5",
     "redux-thunk": "^2.1.0",
@@ -41,7 +43,10 @@
   "eslintConfig": {
     "extends": "standard",
     "rules": {
-      "object-curly-spacing": ["error", "always"],
+      "object-curly-spacing": [
+        "error",
+        "always"
+      ],
       "quotes": [
         "error",
         "double",
@@ -59,5 +64,8 @@
         4
       ]
     }
+  },
+  "dependencies": {
+    "shallowequal": "^0.2.2"
   }
 }

@@ -2,19 +2,16 @@ import { types } from "./types/index"
 import { duplicateActionError, namespaceError } from "./errors"
 
 export function createActions (baseFields, { mapActionType } = {}) {
-    const fields = baseFields._actionSchema
-        ? extractFields(baseFields)
-        : buildFields(baseFields)
+    const fields = baseFields._actionSchema || baseFields
 
-    const actionsArr = fields.map(createAction(mapActionType))
+    const actions = types.Variant(fields, {
+        mapType: mapActionType,
+        namespaceError: namespaceError,
+        duplicateError: duplicateActionError,
+    })
 
-    // check for duplicate namespaced actions
-    keyBy(actionsArr, ({ type }) => type, namespaceError)
-    const actions = keyBy(actionsArr,
-        ({ field }) => field.type, duplicateActionError)
-
-    tagAsActions(actions)
-    return actions
+    tagAsActions(actions.creators, actions)
+    return actions.creators
 }
 
 export function combineActions (actionsByNamespace, addNamespace) {
@@ -27,63 +24,14 @@ export function combineActions (actionsByNamespace, addNamespace) {
                 { mapActionType: (action) => addNamespace(namespace, action) })
         } else {
             const deepAddNamespace = (ns, action) =>
-                addNamespace(namespace, addNamespace(ns, action))
+                addNamespace(namespace
+                    , addNamespace(ns, action))
             res[namespace] = combineActions(actions, deepAddNamespace)
         }
     }
     return res
 }
 
-const Action = types.OneOfType([
-    types.Record([
-        ["type", types.String],
-        ["doc", types.String, "optional"],
-        ["payloadType", types.Object, "optional"],
-    ]),
-    types.Record([
-        ["type", types.String],
-        ["doc", types.String, "optional"],
-    ], ["payloadType", types.Shape]),
-])
-
-Action.toObject = (val) => Action.matchedType(val).toObject(val)
-
-function buildFields (baseFields) {
-    return baseFields.map(Action.toObject)
+function tagAsActions (obj, test) {
+    Object.defineProperty(obj, "_actionSchema", { value: test })
 }
-
-function extractFields (actionMap) {
-    return Object.keys(actionMap).reduce((coll, key) => {
-        coll.push(actionMap[key].field)
-        return coll
-    }, [])
-}
-
-function createAction (mapActionType = id) {
-    return (field) => {
-        const type = mapActionType(field.type)
-        const actionCreator = field.payloadType
-            ? (payload) => ({ type, payload })
-            : () => ({ type })
-
-        actionCreator.type = type
-        actionCreator.field = field
-
-        return actionCreator
-    }
-}
-
-function keyBy (arr, fn, err) {
-    return arr.reduce((coll, item) => {
-        const key = fn(item)
-        if (coll[key]) { throw err(key) }
-        coll[fn(item)] = item
-        return coll
-    }, {})
-}
-
-function tagAsActions (obj) {
-    Object.defineProperty(obj, "_actionSchema", { value: true })
-}
-
-function id (value) { return value }
