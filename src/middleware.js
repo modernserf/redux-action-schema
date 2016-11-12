@@ -1,29 +1,45 @@
-import { mergeIgnoreUndefined } from "./util"
+const defaultIgnoreActions = [
+    "EFFECT_TRIGGERED", "EFFECT_RESOLVED",  // redux-saga
+    "@@router/UPDATE_LOCATION",             // redux-router
+].reduce((m, k) => { m[k] = k; return m }, {})
 
-const defaultMiddlewareOptions = {
-    ignorePayloads: false,
-    onError: console.error.bind(console, "unknown action:"),
-    ignoreActions: ["EFFECT_TRIGGERED", "EFFECT_RESOLVED", "@@router/UPDATE_LOCATION"],
-}
-
-// TODO: separate onError for unknown actions & bad props
-
-export const middlewareHelper = (tests, unformat) => (options = {}) => {
-    const { ignoreActions, ignorePayloads, onError } = mergeIgnoreUndefined(defaultMiddlewareOptions, options)
-    const ignoreMap = ignoreActions.reduce((obj, key) => { obj[key] = true; return obj }, {})
+export function createActionMonitor (actions, {
+    filterActions = (action) => !defaultIgnoreActions[action.type],
+    onUnknownAction = (action) => console.error("unknown action:", action),
+    onMismatchedPayload = null,
+} = {}) {
+    const mergedActions = flattenActionTree(actions)
 
     const test = (action) => {
         if (typeof action !== "object") { return }
+        if (!filterActions(action)) { return }
 
-        const { type, payload } = unformat(action)
-        if (ignoreMap[type]) { return }
-        if (tests[type] && ignorePayloads) { return }
-        if (tests[type] && tests[type](payload)) { return }
-        onError(action)
+        if (!mergedActions[action.type]) {
+            if (onUnknownAction) { onUnknownAction(action) }
+        } else if (onMismatchedPayload) {
+            const { payloadType } = mergedActions[action.type].field
+
+            if ((action.payload && !payloadType) ||
+                (payloadType && !payloadType.test(action.payload))) {
+                onMismatchedPayload(action, payloadType)
+            }
+        }
     }
 
     return () => (next) => (action) => {
         test(action)
         return next(action)
     }
+}
+
+function flattenActionTree (tree, res = {}) {
+    for (const key in tree) {
+        if (typeof tree[key] === "function") {
+            const action = tree[key]
+            res[action.type] = action
+        } else {
+            flattenActionTree(tree[key], res)
+        }
+    }
+    return res
 }

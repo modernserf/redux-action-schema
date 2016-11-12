@@ -1,14 +1,16 @@
 const test = require("tape")
-const { createSchema, types } = require("../dist/index.js")
+const {
+    createActions, createReducerCreator, types,
+} = require("../dist/index.js")
 
 const merge = (a, b) => Object.assign({}, a, b)
 
 test("create reducer", (t) => {
-    const { createReducer } = createSchema([
+    const createReducer = createReducerCreator(createActions([
         ["foo"],
         ["bar", types.String],
         ["baz", ["a", types.Number], ["b", types.Number]],
-    ])
+    ]))
 
     const initState = { count: 0, message: "hello" }
 
@@ -34,9 +36,9 @@ test("create reducer", (t) => {
 })
 
 test("throws when reducer created with unknown action", (t) => {
-    const { createReducer } = createSchema([
+    const createReducer = createReducerCreator(createActions([
         ["foo"],
-    ])
+    ]))
 
     t.throws(() => {
         createReducer({
@@ -48,10 +50,10 @@ test("throws when reducer created with unknown action", (t) => {
 })
 
 test("throws if reducer created with non-function", (t) => {
-    const { createReducer } = createSchema([
+    const createReducer = createReducerCreator(createActions([
         ["foo"],
         ["bar", types.String],
-    ])
+    ]))
 
     t.throws(() => {
         createReducer({
@@ -63,10 +65,10 @@ test("throws if reducer created with non-function", (t) => {
 })
 
 test("create namespaced reducer", (t) => {
-    const { createReducer } = createSchema([
+    const createReducer = createReducerCreator(createActions([
         ["foo"],
         ["bar", types.String],
-    ], { namespace: "ns" })
+    ], { mapActionType: (type) => `ns_${type}` }))
 
     const initState = { count: 0, message: "hello" }
 

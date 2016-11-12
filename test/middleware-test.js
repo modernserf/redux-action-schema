@@ -1,26 +1,49 @@
 const test = require("tape")
-const { createSchema, types } = require("../dist/index.js")
+const {
+    createActions, createActionMonitor, types,
+} = require("../dist/index.js")
 const { createStore, applyMiddleware } = require("redux")
 const thunk = require("redux-thunk").default
 
-test("create middleware", (t) => {
-    const { createReducer, createMiddleware } = createSchema([
+function createStoreWithMiddleware (def, options) {
+    const actions = createActions(def)
+    const reducer = (state = {}) => state
+
+    const actionMonitor = createActionMonitor(actions, options)
+    const store = createStore(reducer, applyMiddleware(actionMonitor))
+    return store
+}
+
+test("handle unknown action", (t) => {
+    const store = createStoreWithMiddleware([
         ["foo"],
         ["bar", types.String],
-    ])
-
-    const initState = { count: 0, message: "hello" }
-
-    const reducer = createReducer({
-        foo: (state) => state,
-        bar: (state) => state,
-    }, initState)
-
-    const middleware = createMiddleware({
-        onError: () => { throw new Error("unknown action") },
+    ], {
+        onUnknownAction: () => { throw new Error("unknown action") },
     })
 
-    const store = createStore(reducer, applyMiddleware(middleware))
+    t.doesNotThrow(() => {
+        store.dispatch({ type: "foo" })
+    })
+    t.doesNotThrow(() => {
+        store.dispatch({ type: "EFFECT_TRIGGERED" })
+    })
+    t.doesNotThrow(() => {
+        store.dispatch({ type: "bar", payload: "world", meta: { a: 1 } })
+    })
+    t.throws(() => {
+        store.dispatch({ type: "quux" })
+    })
+    t.end()
+})
+
+test("handle bad payload", (t) => {
+    const store = createStoreWithMiddleware([
+        ["foo"],
+        ["bar", types.String],
+    ], {
+        onMismatchedPayload: () => { throw new Error("mismatched payload") },
+    })
 
     t.doesNotThrow(() => {
         store.dispatch({ type: "foo" })
@@ -37,69 +60,19 @@ test("create middleware", (t) => {
     t.throws(() => {
         store.dispatch({ type: "foo", payload: "arg" })
     })
-    t.throws(() => {
-        store.dispatch({ type: "quux" })
-    })
     t.end()
 })
 
-test("create middleware with unchecked payloads", (t) => {
-    const { createReducer, createMiddleware } = createSchema([
+test("create middleware with filtered actions", (t) => {
+    const ignored = new Set(["baz", "quux"])
+
+    const store = createStoreWithMiddleware([
         ["foo"],
         ["bar", types.String],
-    ])
-
-    const initState = { count: 0, message: "hello" }
-
-    const reducer = createReducer({
-        foo: (state) => state,
-        bar: (state) => state,
-    }, initState)
-
-    const middleware = createMiddleware({
-        ignorePayloads: true,
-        onError: () => { throw new Error("unknown action") },
+    ], {
+        filterActions: (action) => !ignored.has(action.type),
+        onUnknownAction: () => { throw new Error("unknown action") },
     })
-
-    const store = createStore(reducer, applyMiddleware(middleware))
-
-    t.doesNotThrow(() => {
-        store.dispatch({ type: "foo" })
-    })
-    t.doesNotThrow(() => {
-        store.dispatch({ type: "EFFECT_TRIGGERED" })
-    })
-    t.doesNotThrow(() => {
-        store.dispatch({ type: "bar", payload: "world", meta: { a: 1 } })
-    })
-    t.doesNotThrow(() => {
-        store.dispatch({ type: "bar", payload: { a: "bad argument" } })
-    })
-    t.throws(() => {
-        store.dispatch({ type: "quux" })
-    })
-    t.end()
-})
-
-test("create middleware with ignored actions", (t) => {
-    const { createReducer, createMiddleware } = createSchema([
-        ["foo"],
-        ["bar", types.String],
-    ])
-
-    const initState = { count: 0, message: "hello" }
-
-    const reducer = createReducer({
-        foo: (state) => state,
-        bar: (state) => state,
-    }, initState)
-
-    const middleware = createMiddleware({
-        ignoreActions: ["baz", "quux"],
-        onError: () => { throw new Error("unknown action") },
-    })
-
-    const store = createStore(reducer, applyMiddleware(middleware))
 
     t.doesNotThrow(() => {
         store.dispatch({ type: "foo" })
@@ -113,33 +86,33 @@ test("create middleware with ignored actions", (t) => {
     t.end()
 })
 
-test("doesn't interfere with redux-thunk", (t) => {
-    const { createReducer, createMiddleware } = createSchema([
+test("works with other middleware actions", (t) => {
+    const actions = createActions([
         ["foo"],
         ["bar", types.String],
     ])
+    const reducer = (state = {}) => state
 
-    const initState = { count: 0, message: "hello" }
-
-    const reducer = createReducer({
-        foo: (state) => state,
-        bar: (state) => state,
-    }, initState)
-
-    const middleware = createMiddleware({
-        onError: () => { throw new Error("unknown action") },
+    const actionMonitor = createActionMonitor(actions, {
+        onUnknownAction: () => { throw new Error("unknown action") },
     })
 
-    const asyncAction = (dispatch) => {
+    const store = createStore(reducer, applyMiddleware(actionMonitor, thunk))
+
+    const fooThunk = () => (dispatch) => {
         dispatch({ type: "foo" })
     }
 
-    const store = createStore(
-        reducer,
-        applyMiddleware(middleware, thunk))
+    const quuxThunk = () => (dispatch) => {
+        dispatch({ type: "quux" })
+    }
 
     t.doesNotThrow(() => {
-        store.dispatch(asyncAction)
+        store.dispatch(fooThunk())
+    })
+
+    t.throws(() => {
+        store.dispatch(quuxThunk())
     })
     t.end()
 })

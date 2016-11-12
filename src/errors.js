@@ -11,5 +11,5 @@ export function reducerHandlerError (type) {
 }
 
 export function namespaceError (type) {
-    return new Error("Namespace must be a function or a string")
+    return new Error(`Multiple action types mapped to "${type}"`)
 }

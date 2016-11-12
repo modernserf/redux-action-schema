@@ -28,7 +28,21 @@ test("Exactly", (t) => {
     t.end()
 })
 
-test.skip("InstanceOf")
+test("Optional", (t) => {
+    const _N = types.Optional(types.Number)
+    t.true(_N.test(123))
+    t.true(_N.test(undefined))
+    t.true(_N.test(null))
+    t.false(_N.test("string"))
+    t.end()
+})
+
+test("InstanceOf", (t) => {
+    const _Date = types.InstanceOf(Date)
+    t.true(_Date.test(new Date()))
+    t.false(_Date.test(Date.now()))
+    t.end()
+})
 
 test("OneOf", (t) => {
     const e = ["foo", "bar", "baz"]
@@ -46,6 +60,10 @@ test("OneOfType", (t) => {
 
     t.deepEquals(vals.map(types.OneOfType([types.Number, types.String]).test),
         [false, false, false, true, true, false])
+
+    const T = types.OneOfType([types.Number, types.String])
+    t.equal(T.matchedType(123), types.Number)
+
     t.end()
 })
 
@@ -95,7 +113,59 @@ test("Record", (t) => {
     t.false(Point.test([10]))
 
     t.deepEquals(Point.toObject([10, 20]), { x: 10, y: 20 })
+
+    const Action = types.Record([
+        ["type", types.String],
+        ["doc", types.String, "optional"],
+        ["payloadType", types.Object, "optional"],
+    ])
+
+    t.true(Action.test(["fooAction"]))
+    t.true(Action.test(["fooAction", "with a doc", types.Number]))
+    t.true(Action.test(["barAction", Point]))
+
+    const RestAction = types.Record([
+        ["type", types.String],
+        ["doc", types.String, "optional"],
+    ], ["payloadType", types.Record])
+
+    t.true(RestAction.test(["fooAction"]))
+    t.true(RestAction.test(["fooAction", "with a doc"]))
+    t.true(RestAction.test(
+        ["fooAction",
+            ["a", types.Number],
+            ["b", types.Number]]))
+
+    const action = RestAction.toObject(
+        ["fooAction",
+            ["id", types.Number]])
+
+    const payloadObj = action.payloadType.toObject([123])
+    t.deepEquals(payloadObj, { id: 123 })
+
     t.end()
 })
 
-test.skip("Shape")
+test("Shape", (t) => {
+    const Point = types.Shape([
+        ["x", types.Number],
+        ["y", types.Number],
+    ])
+
+    t.true(Point.test({ x: 10, y: 20 }))
+    t.false(Point.test({ x: 20 }))
+    t.false(Point.test({ x: "foo", y: "bar" }))
+
+    const Location = types.Shape([
+        ["id", types.String],
+        ["point",
+            ["x", types.Number],
+            ["y", types.Number]],
+    ])
+
+    t.true(Location.test({ id: "foo", point: { x: 10, y: 20 } }))
+
+    t.end()
+})
+
+test.skip("ExactShape")

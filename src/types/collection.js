@@ -5,6 +5,13 @@ export function Exactly (value) {
     }
 }
 
+export function Optional (type) {
+    return {
+        test: (val) => type.test(val) || val === null || val === undefined,
+        schema: `Optional<${type.schema}>`,
+    }
+}
+
 export function InstanceOf (ctor) {
     return {
         test: (instance) => instance instanceof ctor,
@@ -33,13 +40,15 @@ export function OneOfType (types) {
     return {
         test: (val) => types.some((type) => type.test(val)),
         schema: `OneOfType<${types.map((t) => t.schema).join("|")}>`,
+        matchedType: (val) => types.find((type) => type.test(val)),
     }
 }
 
 export function Recursive (base, fn) {
     const recur = {
-        test: (val) => base.test(val) || fn(recur),
+        test: (val) => base.test(val) || fn(recur).test(val),
         schema: `Recursive<${base.schema}>`,
+        matchedType: () => base,
     }
     return recur
 }

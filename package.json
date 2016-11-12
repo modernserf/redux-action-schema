@@ -41,8 +41,9 @@
   "eslintConfig": {
     "extends": "standard",
     "rules": {
+      "object-curly-spacing": ["error", "always"],
       "quotes": [
-        2,
+        "error",
         "double",
         {
           "avoidEscape": true,
@@ -50,11 +51,11 @@
         }
       ],
       "comma-dangle": [
-        2,
+        "error",
         "always-multiline"
       ],
       "indent": [
-        2,
+        "error",
         4
       ]
     }

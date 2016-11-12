@@ -1,30 +1,35 @@
-import { ArrayOf, Exactly } from "./collection"
+import { Exactly } from "./collection"
 import { types } from "./base"
 
 // Record is a format for describing tuples
 // Point2D = Record([["x", Number],["y", Number]])
-export function Record (defs, restType) {
+export function Record (defs, restDef = []) {
     const fields = defs.map(parseField)
-    restType = restType ? ArrayOf(restType) : null
+    const [restKey, restType] = restDef
 
     const test = (vals) => {
         let valIndex = 0
         for (let i = 0; i < fields.length; i++) {
             const field = fields[i]
             const val = vals[valIndex]
-            if (field.optional && !val) { continue }
+
             if (field.type.test(val)) {
                 valIndex++
                 continue
             }
+            if (field.optional) { continue }
             return false
         }
         if (valIndex === vals.length) { return true }
-        if (!restType) { return false }
-        return restType(vals.slice(valIndex))
+        try {
+            restType(vals.slice(valIndex))
+            return true
+        } catch (e) {
+            return false
+        }
     }
 
-    const toObject = (vals, {restKey} = {}) => {
+    const toObject = (vals) => {
         // TODO: throw
         if (!test(vals)) { return }
 
@@ -40,7 +45,7 @@ export function Record (defs, restType) {
         }
 
         if (restType) {
-            res[restKey] = vals.slice(valIndex)
+            res[restKey] = restType(vals.slice(valIndex))
         }
 
         return res
@@ -50,6 +55,8 @@ export function Record (defs, restType) {
 
     return {
         test,
+        defs,
+        fields,
         schema: `Record{${fieldSchema}\n}`,
         toObject,
     }
