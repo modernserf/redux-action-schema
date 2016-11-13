@@ -19,19 +19,19 @@ export const createReducerCreator = (actions) => (baseReducers, initState) => {
     }
 }
 
-export function createRootReducer (selectors, actions) {
+export function createRootReducer (actions, selectors) {
     const reducers = {}
     const createReducer = createReducerCreator(actions)
 
     for (const key in selectors) {
-        const { name, field } = selectors[key]
+        const { id, field } = selectors[key]
         const { type, payload } = field.selector
         switch (type) {
         case "plainReducer":
-            reducers[name] = payload.reducer
+            reducers[id] = payload.reducer
             break
         case "reducerMap":
-            reducers[name] = createReducer(
+            reducers[id] = createReducer(
                 payload.reducers, payload.initState)
         }
     }

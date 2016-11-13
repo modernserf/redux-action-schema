@@ -11,7 +11,7 @@ export function createSelectors (specs, { mapSelectorName } = {}) {
 
     Object.assign(
         selectors,
-        keyBy(selectorArr, ({ name }) => name, duplicateSelectorError))
+        keyBy(selectorArr, ({ id }) => id, duplicateSelectorError))
     return selectors
 }
 
@@ -35,7 +35,7 @@ export function reducer (reducers, initState) {
 }
 
 const SelectorDef = types.Record([
-    ["name", types.String],
+    ["id", types.String],
     ["doc", types.String, "optional"],
     ["selector", types.OneOfType([
         types.Function, // raw reducer
@@ -56,21 +56,23 @@ function buildFields (baseFields) {
     })
 }
 
-function createSelector (field, mapName = id, allSelectors) {
-    const name = mapName(field.name)
-    const { payload } = field.selector
-    const selector = ({
-        plainReducer: (state) => state[name],
-        reducerMap: (state) => state[name],
-        selector: createDepsSelector(
-            payload.dependencies,
-            payload.selector,
-            allSelectors),
-    })[field.selector.type]
+function createSelector (mapName = id, allSelectors) {
+    return (field) => {
+        const id = mapName(field.id)
+        const { payload } = field.selector
+        const selector = ({
+            plainReducer: (state) => state[id],
+            reducerMap: (state) => state[id],
+            selector: createDepsSelector(
+                payload.dependencies,
+                payload.selector,
+                allSelectors),
+        })[field.selector.type]
 
-    selector.name = name
-    selector.field = field
-    return selector
+        selector.id = id
+        selector.field = field
+        return selector
+    }
 }
 
 export function createDepsSelector (dependencies, fn, allSelectors) {
@@ -78,6 +80,7 @@ export function createDepsSelector (dependencies, fn, allSelectors) {
     let lastValue
     return (state) => {
         const deps = dependencies.reduce((coll, dep) => {
+            // TODO: is this lookup worth caching?
             if (!allSelectors[dep]) {
                 throw unknownSelectorError(dep)
             }

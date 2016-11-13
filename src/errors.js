@@ -5,8 +5,8 @@ export function duplicateActionError (type) {
     return new Error(duplicate("actions", "type", type))
 }
 
-export function duplicateSelectorError (name) {
-    return new Error(duplicate("selectors", "name", name))
+export function duplicateSelectorError (id) {
+    return new Error(duplicate("selectors", "id", id))
 }
 
 export function duplicateVariantError (type) {
@@ -20,8 +20,8 @@ export function unknownActionError (type) {
     return new Error(unknown("action", type))
 }
 
-export function unknownSelectorError (name) {
-    return new Error(unknown("selector", name))
+export function unknownSelectorError (id) {
+    return new Error(unknown("selector", id))
 }
 
 export function reducerHandlerError (type) {

@@ -1,6 +1,7 @@
 const test = require("tape")
 const {
     createActions, createReducerCreator, types,
+    createSelectors, createRootReducer, reducer, selector,
 } = require("../dist/index.js")
 
 const merge = (a, b) => Object.assign({}, a, b)
@@ -82,5 +83,43 @@ test("create namespaced reducer", (t) => {
         reducer(initState, { type: "ns_foo" }))
     t.deepEquals({ count: 0, message: "world" },
         reducer(initState, { type: "ns_bar", payload: "world" }))
+    t.end()
+})
+
+test("createRootReducer", (t) => {
+    const actions = createActions([
+        ["foo"],
+        ["bar", types.String],
+        ["baz", ["a", types.Number], ["b", types.Number]],
+    ])
+
+    const selectors = createSelectors([
+        ["quux", (state = "") => state],
+        ["plugh", reducer({
+            foo: ({ a, b }) => ({ a: +1, b: +1 }),
+            baz: (_, { a, b }) => ({ a, b }),
+        }, { a: 0, b: 0 })],
+        ["xyzzy", selector(
+            ["quux", "plugh"],
+            ({ quux, plugh }) => ({ quux, a: plugh.a }))],
+    ])
+
+    const rootReducer = createRootReducer(actions, selectors)
+
+    const initState = rootReducer(undefined, { type: "@@init" })
+
+    t.deepEquals(initState, {
+        quux: "",
+        plugh: { a: 0, b: 0 },
+    })
+
+    t.deepEquals(selectors.quux(initState), "")
+    t.deepEquals(selectors.plugh(initState), { a: 0, b: 0 })
+    t.deepEquals(selectors.xyzzy(initState), { quux: "", a: 0 })
+
+    const nextState = rootReducer(initState, actions.foo())
+    t.deepEquals(selectors.plugh(nextState), { a: 1, b: 1 })
+    t.deepEquals(selectors.xyzzy(nextState), { quux: "", a: 1 })
+
     t.end()
 })
