@@ -1,5 +1,5 @@
 const test = require("tape")
-const { types, createSelectors, selector, reducer } = require("../dist")
+const { types, createSelectors, selector, reducer } = require("../index.js")
 
 test("createSelectors", (t) => {
     const fooReducer = (state = "", action) => state

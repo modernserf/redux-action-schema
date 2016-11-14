@@ -1,62 +1,70 @@
-import { type, createActionSchema, createSelectorSchema } from "redux-schema"
+import { types, createActions, createSelectors } from "redux-action-schema"
 
-export const Path = type.ArrayOf(type.String)
+export const Status = types.OneOf(["all", "todo", "completed"])
 
-export const Route = type([
-    ["path", Path],
-    ["query", type.ObjectMapOf(type.String)],
+export const TodoFragment = types.Variant([
+    ["tag", types.String],
+    ["text", types.String],
 ])
 
-export const Status = type.OneOf(["all", "todo", "completed"])
+export const Path = types.ArrayOf(types.String)
 
-const TodoFragment = type.UnionOf([
-    ["tag", type.String],
-    ["text", type.String],
+export const Route = types.Shape([
+    ["path", Path],
+    ["query", types.Object], // ObjectMapOf(types.String)
 ])
 
 export const todoFields = [
-    ["id", type.String],
+    ["id", types.String],
     ["status", Status],
-    ["text", type.String],
+    ["text", types.String],
 ]
 
-export const Todo = type(todoFields)
+export const Todo = types.Shape(todoFields)
 
-export const ParsedTodo = type([
+export const ParsedTodo = types.Shape([
     ...todoFields,
     ["parsed", TodoFragment],
-    ["tags", type.ArrayOf(type.String)],
+    ["tags", types.ArrayOf(types.String)],
 ])
 
-export const Tag = type([
-    ["value", type.String],
-    ["active", type.Boolean],
+export const Tag = types.Shape([
+    ["value", types.String],
+    ["active", types.Boolean],
 ])
 
-export const actionSchema = createActionSchema([
+console.log("before data import")
+
+import {
+    statusFilter, tagFilter, todos, path, route, filteredTodos, tags,
+} from "./data"
+
+console.log("after data import")
+
+export const actions = createActions([
     ["routeChanged", Route],
     ["filteredStatus", Status],
-    ["setTagFilter", type.String],
-    ["addedTagFilter", type.String],
-    ["removedTagFilter", type.String],
+    ["setTagFilter", types.String],
+    ["addedTagFilter", types.String],
+    ["removedTagFilter", types.String],
     ["clearedTagFilter"],
-    ["loadedTodos", type.ArrayOf(Todo)],
+    ["loadedTodos", types.ArrayOf(Todo)],
     ["addedTodo", Todo],
     ["editedTodo",
-        ["id", type.String],
-        ["text", type.String]],
+        ["id", types.String],
+        ["text", types.String]],
     ["toggledTodo",
-        ["id", type.String]],
+        ["id", types.String]],
     ["deletedTodo",
-        ["id", type.String]],
+        ["id", types.String]],
 ])
 
-export const selectorSchema = createSelectorSchema([
-    ["statusFilter", Status],
-    ["tagFilter", type.ArrayOf(type.String)],
-    ["todos", type.ArrayOf(Todo)],
-    ["path", Path],
-    ["route", Route],
-    ["filteredTodos", type.ArrayOf(ParsedTodo)],
-    ["tags", type.ArrayOf(Tag)],
+export const selectors = createSelectors([
+    ["statusFilter", statusFilter],
+    ["tagFilter", tagFilter],
+    ["todos", todos],
+    ["path", path],
+    ["route", route],
+    ["filteredTodos", filteredTodos],
+    ["tags", tags],
 ])

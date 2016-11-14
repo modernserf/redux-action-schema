@@ -2,7 +2,7 @@ const test = require("tape")
 const {
     createActions, createReducerCreator, types,
     createSelectors, createRootReducer, reducer, selector,
-} = require("../dist/index.js")
+} = require("../index.js")
 
 const merge = (a, b) => Object.assign({}, a, b)
 

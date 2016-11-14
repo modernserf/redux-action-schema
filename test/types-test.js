@@ -1,5 +1,5 @@
 const test = require("tape")
-const { types } = require("../dist/index.js")
+const { types } = require("../index.js")
 
 test("type checking", (t) => {
     const vals = [

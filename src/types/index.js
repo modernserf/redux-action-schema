@@ -1,7 +1,12 @@
 import { types as baseTypes } from "./base"
-import * as collectionTypes from "./collection"
+import {
+    Exactly, Optional, InstanceOf, OneOf, ArrayOf, OneOfType, Recursive, Tuple,
+} from "./collection"
 import { Record } from "./record"
 import { Shape } from "./shape"
 import { Variant } from "./variant"
 
-export const types = Object.assign({ Record, Shape, Variant }, baseTypes, collectionTypes)
+export default Object.assign({
+    Exactly, Optional, InstanceOf, OneOf, ArrayOf, OneOfType, Recursive, Tuple,
+    Record, Shape, Variant,
+}, baseTypes)

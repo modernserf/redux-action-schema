@@ -1,7 +1,7 @@
 const test = require("tape")
 const {
     createActions, createActionMonitor, types,
-} = require("../dist/index.js")
+} = require("../index.js")
 const { createStore, applyMiddleware } = require("redux")
 const thunk = require("redux-thunk").default
 

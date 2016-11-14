@@ -51,7 +51,7 @@ export function Record (defs, restDef = []) {
         return res
     }
 
-    const fieldSchema = fields.map(({schema}) => `\n    ${schema}`).join("")
+    const fieldSchema = fields.map(({ schema }) => `\n    ${schema}`).join("")
 
     return {
         test,

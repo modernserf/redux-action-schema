@@ -1,5 +1,5 @@
 const test = require("tape")
-const { createActions, combineActions, types } = require("../dist/index.js")
+const { createActions, combineActions, types } = require("../index.js")
 
 test("makes action creators", (t) => {
     const actions = createActions([

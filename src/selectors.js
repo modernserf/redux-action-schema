@@ -1,7 +1,7 @@
 import shallowequal from "shallowequal"
-import { types } from "./types/index"
 import { keyBy, id } from "./util"
 import { duplicateSelectorError, unknownSelectorError } from "./errors"
+const types = require("./types")
 
 export function createSelectors (specs, { mapSelectorName } = {}) {
     const fields = buildFields(specs)
