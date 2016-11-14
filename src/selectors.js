@@ -41,6 +41,7 @@ const SelectorDef = types.Record([
         types.Function, // raw reducer
         Selector,
     ])],
+    ["returnType", types.Object, "optional"],
 ])
 
 function buildFields (baseFields) {
