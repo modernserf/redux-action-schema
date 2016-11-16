@@ -24,6 +24,9 @@ const Selector = types.Variant([
     ["selector",
         ["dependencies", types.ArrayOf(types.String)],
         ["selector", types.Function]],
+    ["asyncSelector",
+        ["dependencies", types.ArrayOf(types.String)],
+        ["selector", types.Function]],
 ])
 
 export function selector (dependencies, selector) {
@@ -32,6 +35,10 @@ export function selector (dependencies, selector) {
 
 export function reducer (reducers, initState) {
     return Selector.creators.reducerMap({ reducers, initState })
+}
+
+export function asyncSelector (dependencies, selector) {
+    return Selector.creators.asyncSelector({ dependencies, selector })
 }
 
 const SelectorDef = types.Record([
@@ -57,13 +64,14 @@ function buildFields (baseFields) {
     })
 }
 
-function createSelector (mapName = id, allSelectors) {
+export function createSelector (mapName = id, allSelectors) {
     return (field) => {
         const id = mapName(field.id)
         const { payload } = field.selector
         const selector = ({
             plainReducer: (state) => state[id],
             reducerMap: (state) => state[id],
+            asyncSelector: (state) => state[id],
             selector: createDepsSelector(
                 payload.dependencies,
                 payload.selector,

@@ -45,11 +45,15 @@ test("InstanceOf", (t) => {
 })
 
 test("OneOf", (t) => {
-    const e = ["foo", "bar", "baz"]
+    const Enum = types.OneOf(["foo", "bar", "baz"])
 
-    t.true(types.OneOf(e).test("foo"))
-    t.false(types.OneOf(e).test("quux"))
-    t.false(types.OneOf(e).test(null))
+    t.true(Enum.test("foo"))
+    t.false(Enum.test("quux"))
+    t.false(Enum.test(null))
+
+    t.true(Enum.values.foo === "foo")
+    t.true(Enum.values.quux === undefined)
+
     t.end()
 })
 
@@ -72,8 +76,13 @@ test("ArrayOf", (t) => {
     t.false(types.ArrayOf(types.Number).test(["foo", "bar", "baz"]))
     t.false(types.ArrayOf(types.Number).test([1, 2, "foo", 4]))
     t.false(types.ArrayOf(types.Number).test([1, 2, null, 4]))
-    // TODO: optional
-    // t.true(types.ArrayOf(types.Number.optional).test([1, 2, null, 4]))
+    t.end()
+})
+
+test("ObjectOf", (t) => {
+    t.true(types.ObjectOf(types.Number).test({ foo: 1, bar: 2 }))
+    t.false(types.ObjectOf(types.Number).test({ foo: 1, bar: "string" }))
+    t.false(types.ObjectOf(types.Number).test({ foo: 1, bar: 2, baz: undefined }))
     t.end()
 })
 
