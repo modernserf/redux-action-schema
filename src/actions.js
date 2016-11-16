@@ -1,5 +1,5 @@
 import { duplicateActionError, namespaceError } from "./errors"
-const types = require("./types")
+const { types } = require("./types")
 
 export function createActions (baseFields, { mapActionType } = {}) {
     const fields = baseFields._actionSchema || baseFields

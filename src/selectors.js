@@ -1,7 +1,7 @@
 import shallowequal from "shallowequal"
 import { keyBy, id } from "./util"
 import { duplicateSelectorError, unknownSelectorError } from "./errors"
-const types = require("./types")
+const { types } = require("./types")
 
 export function createSelectors (specs, { mapSelectorName } = {}) {
     const fields = buildFields(specs)
@@ -24,6 +24,9 @@ const Selector = types.Variant([
     ["selector",
         ["dependencies", types.ArrayOf(types.String)],
         ["selector", types.Function]],
+    ["asyncSelector",
+        ["dependencies", types.ArrayOf(types.String)],
+        ["selector", types.Function]],
 ])
 
 export function selector (dependencies, selector) {
@@ -34,15 +37,31 @@ export function reducer (reducers, initState) {
     return Selector.creators.reducerMap({ reducers, initState })
 }
 
-const SelectorDef = types.Record([
-    ["id", types.String],
-    ["doc", types.String, "optional"],
-    ["selector", types.OneOfType([
-        types.Function, // raw reducer
-        Selector,
-    ])],
-    ["returnType", types.Object, "optional"],
+export function asyncSelector (dependencies, selector) {
+    return Selector.creators.asyncSelector({ dependencies, selector })
+}
+
+const SelectorDef = types.OneOfType([
+    types.Record([
+        ["id", types.String],
+        ["doc", types.String, "optional"],
+        ["selector", types.OneOfType([
+            types.Function, // raw reducer
+            Selector,
+        ])],
+        ["returnType", types.Object, "optional"],
+    ]),
+    types.Record([
+        ["id", types.String],
+        ["doc", types.String, "optional"],
+        ["selector", types.OneOfType([
+            types.Function, // raw reducer
+            Selector,
+        ])],
+    ], ["returnType", types.Shape]),
 ])
+
+SelectorDef.toObject = (val) => SelectorDef.matchedType(val).toObject(val)
 
 function buildFields (baseFields) {
     // TODO throw error on invalid definition
@@ -57,13 +76,14 @@ function buildFields (baseFields) {
     })
 }
 
-function createSelector (mapName = id, allSelectors) {
+export function createSelector (mapName = id, allSelectors) {
     return (field) => {
         const id = mapName(field.id)
         const { payload } = field.selector
         const selector = ({
             plainReducer: (state) => state[id],
             reducerMap: (state) => state[id],
+            asyncSelector: (state) => state[id],
             selector: createDepsSelector(
                 payload.dependencies,
                 payload.selector,

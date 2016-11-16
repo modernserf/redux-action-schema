@@ -1,3 +1,5 @@
+import { types as baseTypes } from "./base"
+
 export function Exactly (value) {
     return {
         test: (compare) => value === compare,
@@ -23,16 +25,27 @@ export function InstanceOf (ctor) {
 // TODO: OneOf takes object and matches values
 // TODO: OneOf({ nickname: 'value' })
 export function OneOf (values) {
-    return {
-        test: (val) => values.indexOf(val) !== -1,
+    const valueMap = values.reduce((m, k) => { m[k] = k; return m }, {})
+
+    return Object.assign({}, valueMap, {
+        test: (val) => !!valueMap[val],
+        values: valueMap,
         schema: `OneOf<${JSON.stringify(values)}>`,
-    }
+    })
 }
 
 export function ArrayOf (type) {
     return {
         test: (vals) => Array.isArray(vals) && !!vals.every(type.test),
         schema: `Array<${type.schema}>`,
+    }
+}
+
+export function ObjectOf (type) {
+    return {
+        test: (obj) => baseTypes.Object.test(obj) &&
+            Object.keys(obj).every((key) => type.test(obj[key])),
+        schema: `Object<${type.schema}>`,
     }
 }
 

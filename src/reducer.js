@@ -1,5 +1,6 @@
 import { combineReducers } from "redux"
 import { unknownActionError, reducerHandlerError } from "./errors"
+import { createPromiseReducer } from "./promise"
 
 export const createReducerCreator = (actions) => (baseReducers, initState) => {
     const reducerMap = {}
@@ -33,6 +34,9 @@ export function createRootReducer (actions, selectors) {
         case "reducerMap":
             reducers[id] = createReducer(
                 payload.reducers, payload.initState)
+            break
+        case "asyncSelector":
+            reducers[id] = createPromiseReducer(id, createReducerCreator)
         }
     }
 
