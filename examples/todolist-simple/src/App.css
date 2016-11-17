@@ -1,0 +1,114 @@
+.App {
+    max-width: 600px;
+    margin: 4em auto;
+}
+
+.App__title {
+    text-align: center;
+    font-weight: lighter;
+}
+
+.App__container {
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.TodoHeader {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+}
+
+.TodoHeader__input-wrap {
+    flex-grow: 1;
+}
+
+.TodoHeader__completed button {
+    font-size: 2em;
+    padding: 0.5em;
+}
+
+.TodoInput input,
+.Todo.--editing input {
+    width: 100%;
+    font-size: 2em;
+    padding: 0.5em;
+    border: none;
+}
+
+.Todo {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+}
+
+.Todo__edit-form {
+    flex-grow: 1;
+}
+
+.Todo__toggle-wrap {
+    padding: 0.5em;
+}
+
+.Todo__content {
+    flex-grow: 1;
+    padding: 0.5em;
+}
+
+.Todo__delete-button {
+    opacity: 0;
+    font-size: 2em;
+    line-height: 1em;
+    /*padding: 0.5em;*/
+}
+
+.Todo:hover .Todo__delete-button {
+    opacity: 1;
+}
+
+.ToggleButton {
+    border-radius: 100%;
+    border: 1px solid #ccc;
+    height: 2em;
+    width: 2em;
+}
+
+.ToggleButton__check {
+    opacity: 0;
+}
+
+.ToggleButton.--completed .ToggleButton__check {
+    opacity: 1;
+}
+
+
+.TodoFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5em;
+}
+
+.TodoFooter__count {
+    flex-basis: 100px;
+}
+
+.TodoFooter__clear {
+    visibility: hidden;
+}
+
+.TodoFooter.--completed-todos .TodoFooter__clear {
+    visibility: visible;
+}
+
+.VisibilitySettings ul {
+    display: flex;
+}
+
+.VisibilitySettings__item {
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.VisibilitySettings__item.--active {
+    border-color: #ccc;
+}

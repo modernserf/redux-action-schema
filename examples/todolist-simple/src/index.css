@@ -1,0 +1,25 @@
+* {
+    box-sizing: border-box;
+    position: relative;
+}
+
+button {
+    display: block;
+    appearance: none;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background-color: #eee;
+}

@@ -1,5 +1,5 @@
 import { Exactly } from "./collection"
-import { types } from "./base"
+import { types as _types } from "./base"
 
 // Record is a format for describing tuples
 // Point2D = Record([["x", Number],["y", Number]])
@@ -63,9 +63,9 @@ export function Record (defs, restDef = []) {
 }
 
 export const Field = Record([
-    ["name", types.String],
-    ["comment", "AKA docstring", types.String, "optional"],
-    ["type", types.Object],
+    ["name", _types.String],
+    ["comment", "AKA docstring", _types.String, "optional"],
+    ["type", _types.Object],
     ["optional", Exactly("optional"), "optional"],
 ])
 

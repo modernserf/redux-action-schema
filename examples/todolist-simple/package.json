@@ -1,13 +1,16 @@
 {
-  "name": "todolist",
+  "name": "todolist-simple",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
     "react-scripts": "0.7.0"
   },
   "dependencies": {
-    "react": "^15.3.2",
-    "react-dom": "^15.3.2"
+    "react": "^15.4.0",
+    "react-dom": "^15.4.0",
+    "react-redux": "^4.4.6",
+    "redux": "^3.6.0",
+    "redux-action-schema": "^1.0.0-alpha.1"
   },
   "scripts": {
     "start": "react-scripts start",

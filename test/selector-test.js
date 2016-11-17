@@ -33,6 +33,31 @@ test("createSelectors", (t) => {
     t.end()
 })
 
+test("createSelectors with return types", (t) => {
+    const fooReducer = (state = "", action) => state
+
+    const barReducer = reducer({
+        actionA: (state, payload) => state,
+        actionB: (state, payload) => state,
+    }, "")
+
+    const bazSelector = selector(["foo", "bar"], ({ foo, bar }) => ({
+        foo, bar,
+    }))
+
+    t.doesNotThrow(() => {
+        createSelectors([
+            ["foo", "a plain reducer", fooReducer],
+            ["bar", "a schematized reducer", barReducer, types.String],
+            ["baz", bazSelector,
+                ["foo", types.String],
+                ["bar", types.String]],
+        ])
+    })
+
+    t.end()
+})
+
 test("createSelectors throws on invalid selector defs", (t) => {
     t.throws(() => {
         const fooReducer = (state = "", action) => state

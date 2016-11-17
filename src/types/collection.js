@@ -27,11 +27,11 @@ export function InstanceOf (ctor) {
 export function OneOf (values) {
     const valueMap = values.reduce((m, k) => { m[k] = k; return m }, {})
 
-    return {
+    return Object.assign({}, valueMap, {
         test: (val) => !!valueMap[val],
         values: valueMap,
         schema: `OneOf<${JSON.stringify(values)}>`,
-    }
+    })
 }
 
 export function ArrayOf (type) {

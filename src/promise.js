@@ -1,5 +1,5 @@
 import { createDepsSelector } from "./selectors"
-const types = require("./types")
+const { types } = require("./types")
 
 export const Promise = types.Variant([
     ["pending"],

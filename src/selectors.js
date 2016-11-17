@@ -1,7 +1,7 @@
 import shallowequal from "shallowequal"
 import { keyBy, id } from "./util"
 import { duplicateSelectorError, unknownSelectorError } from "./errors"
-const types = require("./types")
+const { types } = require("./types")
 
 export function createSelectors (specs, { mapSelectorName } = {}) {
     const fields = buildFields(specs)
@@ -41,15 +41,27 @@ export function asyncSelector (dependencies, selector) {
     return Selector.creators.asyncSelector({ dependencies, selector })
 }
 
-const SelectorDef = types.Record([
-    ["id", types.String],
-    ["doc", types.String, "optional"],
-    ["selector", types.OneOfType([
-        types.Function, // raw reducer
-        Selector,
-    ])],
-    ["returnType", types.Object, "optional"],
+const SelectorDef = types.OneOfType([
+    types.Record([
+        ["id", types.String],
+        ["doc", types.String, "optional"],
+        ["selector", types.OneOfType([
+            types.Function, // raw reducer
+            Selector,
+        ])],
+        ["returnType", types.Object, "optional"],
+    ]),
+    types.Record([
+        ["id", types.String],
+        ["doc", types.String, "optional"],
+        ["selector", types.OneOfType([
+            types.Function, // raw reducer
+            Selector,
+        ])],
+    ], ["returnType", types.Shape]),
 ])
+
+SelectorDef.toObject = (val) => SelectorDef.matchedType(val).toObject(val)
 
 function buildFields (baseFields) {
     // TODO throw error on invalid definition

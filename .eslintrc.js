@@ -1,9 +1,11 @@
 module.exports = {
+    parser: "babel-eslint",
     extends: [
         "standard",
         "plugin:import/errors",
+        "plugin:react/recommended",
     ],
-    plugins: ["standard","import"],
+    plugins: ["standard","import","react"],
     rules: {
       "object-curly-spacing": ["error", "always"],
       "quotes": ["error","double", {
