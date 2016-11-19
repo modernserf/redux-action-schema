@@ -1,4 +1,4 @@
-import { createDepsSelector } from "./selectors"
+import { createSelectorCreator } from "./selectors"
 const { types } = require("./types")
 
 export const Promise = types.Variant([
@@ -41,13 +41,13 @@ export function createPromiseMiddleware (selectors) {
 }
 
 function createPromiseChangeHandler ({ id, field }, allSelectors) {
-    const depsSelector = createDepsSelector(
-        field.selector.payload.dependencies, (x) => x, allSelectors)
+    const { dependencies } = field.selector.payload
+    const select = createSelectorCreator(allSelectors)(dependencies)
 
     let lastState
     let lastPromise
     return (dispatch, getState) => {
-        const myState = depsSelector(getState())
+        const myState = select(getState())
         if (myState === lastState) { return }
         lastState = myState
         dispatch(requestedPromise({ id }))

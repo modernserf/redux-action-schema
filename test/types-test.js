@@ -98,19 +98,6 @@ test("Tuple", (t) => {
     t.end()
 })
 
-test("Recursive", (t) => {
-    const List = types.Recursive(
-        types.Tuple([]),
-        (recur) => types.Tuple([types.Any, recur]))
-
-    t.true(List.test([]))
-    t.true(List.test(["foo", []]))
-    t.true(List.test(["foo", ["bar", ["baz", []]]]))
-    t.false(List.test(["foo", "bar"]))
-    t.false(List.test(["foo", ["bar", "baz"]]))
-    t.end()
-})
-
 test("Record", (t) => {
     const Point = types.Record([
         ["x", types.Number],

@@ -1,6 +1,6 @@
 import { types as baseTypes } from "./base"
 import {
-    Exactly, Optional, InstanceOf, OneOf, ArrayOf, ObjectOf, OneOfType, Recursive, Tuple,
+    Exactly, Optional, InstanceOf, OneOf, ArrayOf, ObjectOf, OneOfType, Tuple,
 } from "./collection"
 import { Record } from "./record"
 import { Shape } from "./shape"
@@ -8,7 +8,7 @@ import { Variant } from "./variant"
 
 const types = Object.assign({
     Exactly, Optional, InstanceOf, OneOf, ArrayOf, ObjectOf, OneOfType,
-    Recursive, Tuple, Record, Shape, Variant,
+    Tuple, Record, Shape, Variant,
 }, baseTypes)
 
 for (const key in types) {

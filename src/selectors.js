@@ -6,8 +6,10 @@ const { types } = require("./types")
 export function createSelectors (specs, { mapSelectorName } = {}) {
     const fields = buildFields(specs)
     const selectors = {}
+    const createSelector = createSelectorCreator(selectors)
+
     const selectorArr = fields.map(
-        createSelector(mapSelectorName, selectors))
+        createSelectorField(mapSelectorName, createSelector))
 
     Object.assign(
         selectors,
@@ -64,7 +66,7 @@ function buildFields (baseFields) {
     })
 }
 
-export function createSelector (mapName = id, allSelectors) {
+function createSelectorField (mapName = id, createSelector) {
     return (field) => {
         const id = mapName(field.id)
         const { payload } = field.selector
@@ -72,10 +74,9 @@ export function createSelector (mapName = id, allSelectors) {
             plainReducer: (state) => state[id],
             reducerMap: (state) => state[id],
             asyncSelector: (state) => state[id],
-            selector: createDepsSelector(
+            selector: createSelector(
                 payload.dependencies,
-                payload.selector,
-                allSelectors),
+                payload.selector),
         })[field.selector.type]
 
         selector.id = id
@@ -84,23 +85,31 @@ export function createSelector (mapName = id, allSelectors) {
     }
 }
 
-export function createDepsSelector (dependencies, fn, allSelectors) {
-    let lastDeps
-    let lastValue
-    return (state) => {
-        const deps = dependencies.reduce((coll, dep) => {
-            // TODO: is this lookup worth caching?
-            if (!allSelectors[dep]) {
-                throw unknownSelectorError(dep)
+// (selectors) => ([ids], combineFn) => (state) => data
+// (selectors) => ({id: renamedId}, combineFn) => (state) => data
+export function createSelectorCreator (allSelectors) {
+    return (depNames, fn = id) => {
+        let lastDeps
+        let lastValue
+        const depMap = Array.isArray(depNames)
+            ? keyBy(depNames, id, duplicateSelectorError)
+            : depNames
+
+        return (state) => {
+            const deps = {}
+            for (const key in depMap) {
+                if (!allSelectors[key]) {
+                    throw unknownSelectorError(key)
+                }
+                const mappedKey = depMap[key]
+                deps[mappedKey] = allSelectors[key](state)
             }
-            coll[dep] = allSelectors[dep](state)
-            return coll
-        }, {})
 
-        if (shallowequal(deps, lastDeps)) { return lastValue }
+            if (shallowequal(deps, lastDeps)) { return lastValue }
 
-        lastDeps = deps
-        lastValue = fn(deps)
-        return lastValue
+            lastDeps = deps
+            lastValue = fn(deps)
+            return lastValue
+        }
     }
 }

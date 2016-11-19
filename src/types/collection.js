@@ -50,14 +50,6 @@ export function OneOfType (types) {
     }
 }
 
-export function Recursive (base, fn) {
-    const recur = {
-        test: (val) => base.test(val) || fn(recur).test(val),
-        matchedType: () => base,
-    }
-    return recur
-}
-
 // Point2D = Tuple([Number, Number])
 export function Tuple (types) {
     return {

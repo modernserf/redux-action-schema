@@ -9,6 +9,6 @@ const tests = [
 ]
 
 export const types = tests.reduce((obj, [key, test]) => {
-    obj[key] = { test, schema: key }
+    obj[key] = { test }
     return obj
 }, {})

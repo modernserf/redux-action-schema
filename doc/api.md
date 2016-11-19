@@ -1,152 +1,65 @@
 # API Reference
 
-- [types](#types)
-- [createSchema](#makeschema)
-- [schema methods](#schema)
-    + [actions](#actions)
-    + [actionCreators](#actioncreators)
-    + [createReducer](#createreducer)
-    + [createMiddleware](#createmiddleware)
-- [createSchemaObserver](#createschemaobserver)
-
-```
-import { types, createSchema, createSchemaObserver } from "redux-action-schema"
-```
-
 # types
 
-Types are used for schema definitions and action validation.
+## base types
+- Object
+- Number
+- String
+- Boolean
+- Function
+- Array
+- Any
 
-Any function that takes a value & returns a boolean can be used as a type, but we've provided a few common ones:
+## parameterized types
+- Exactly(value)
+- Optional(type)
+- InstanceOf(constructor)
+- OneOf([value])
+- ArrayOf(type)
+- ObjectOf(type)
+- OneOfType([type])
+- Tuple(shape)
+- Record([fields])
+- Shape([fields])
+- Variant([records])
 
-```
-types.Object // matches any non-Array Object
-types.Number // matches numbers
-types.String // matches strings
-types.Array // matches Arrays
-types.Boolean // matches bools
-types.Any // matches any non-null
-types.OneOf([values...]) // matches members of array
-types.ArrayOf(typeFn) // matches arrays where each element matches typeFn
-types.OneOfType(typeA, typeB, ...) // matches any of its arguments
-```
+## propTypes(definition)
 
-Each of the types also has an `optional` variant that also matches `null` and `undefined`:
+## propTypes template
 
-```
-types.Object.optional // matches { foo: bar }, null, undefined
-types.ArrayOf.optional(types.Number) // matches [1,2,3], null, undefined
-types.ArrayOf(types.Number.optional) // matches [1, null, 3]
-```
+# actions
 
-# createSchema
+## createActions(definitions)
 
-```
-createSchema(actions, [options])
-```
+## actionSchema template
 
-### Arguments
+## combineActions({scope: actions}, [rootActions])
 
-- `actions` _(Array)_: A list of action definitions to validate against. See [next section](#action-definitions) for more on this.
-- `[options]` _(Object)_: Additional options for building the schema:
-    + `namespace` (_String_ | `(String) => String`): rewrite action type strings handled by this schema.
-        * The function form takes an action name and returns a modified action name: `schema = createSchema(["foo"], { namespace: (type) => type.toUpperCase() })` will use `schema.actions.foo` but expect actions like `{ type: "FOO" }`.
-        * The string form prepends that string with an underscore to the original action name: `schema = createSchema(["foo"], { namespace: "ns"})` will use `schema.actions.foo` but expect actions like `{ type: "ns_foo" }`.
+# selectors
 
-### Returns
+## createSelectors(definitions)
 
-({ [actions](#actions), [actionCreators](#actioncreators), [createReducer](#createreducer), [createMiddleware](#createmiddleware) }) = : a collection of objects and functions for working with and validating actions.
+## selectorSchema template
 
+## selector types
+- plain reducer function
+- reducerMap(reducers, initState)
+- selector(dependencies, combineState)
+- asyncSelector
+- observableSelector
 
-## Action definitions
+## createSelectorCreator(selectors) => (dependencies, [combineState])
 
-```
-// no parameters
-[typeName]
-[typeName, docstring]
+## combineSelectors({ scope: selectors }, [rootSelectors])
 
-// single parameter
-[typeName, typeFn]
-[typeName, docstring, typeFn]
+# reducers
 
-// named parameters
-[typeName, docstring,
-    [paramName, typeFn],
-    [paramName, docstring, typeFn],
-    ...
-]
-```
+## createReducerCreator(actions, [scope]) => (reducerMap, initState, [scope])
+TODO scope as arg to factory or function?
 
-# Schema methods
+## createRootReducer(actions, selectors)
 
-## actions
+# connector
 
-```
-schema.actions.<ACTION_NAME>
-```
-
-An object mapping action names to their string representations. By default, these are identical, e.g. `actions.foo === "foo"`; however, if the schema is created with a namespace parameter, that will be prepended to the action name, e.g. given `{ namespace: "ns" }` then `actions.foo === "ns_foo"`.
-
-## actionCreators
-
-An object mapping action names to functions that create actions of that type.
-
-```
-schema.actionCreators.foo(value) => { type: "foo", payload: value }
-```
-
-## createReducer
-
-```
-schema.createReducer(reducerMap, [initialState])
-```
-
-### Arguments
-
-- `reducerMap` _(Object)_ : map of action types to reducer functions, with signature `(state, payload, action) => nextState`
-- `[initState]` _(Any)_ : initial state provided to reducer functions.
-
-### Returns
-
-(`(state = initState, action) => nextState`): a reducer function that handles all of the actions in the reducer map.
-
-### Throws
-
-`createReducer` throws if a key in the reducer map does not correspond to an action type, or if a value in the reducer map is not a function.
-
-## createMiddleware
-
-```
-schema.createMiddleware([options])
-```
-
-### Arguments
-
-- `[options]`
-    + `ignorePayloads` _(Boolean)_: Don't type check payloads, only check type names. You may want to use this for performance reasons. **Default value:** `false`.
-    + `onError` (`(action) => ()`): Callback called when an action doesn't validate. **Default value:** `console.error("unknown action:", action)`
-    + `ignoreActions` _(Array<String>)_: List of actions not in schema that shouldn't cause validation errors, e.g. those used by third-party middleware. **Default value:** `["EFFECT_TRIGGERED", "EFFECT_RESOLVED", "@@router/UPDATE_LOCATION"]`, which are used by popular libraries redux-saga and react-redux-router.
-
-### Returns
-
-(`middleware`): a Redux middleware.
-
-# createSchemaObserver
-
-```
-createSchemaObserver()
-```
-
-### Returns
-
-(`observerMiddleware`): a redux middleware, with additional methods for schema generation.
-
-## schemaDefinitionString
-
-```
-observerMiddleware.schemaDefinitionString()
-```
-
-### Returns
-
-_(String)_: source code for a schema definition.
+## createConnector(actions, selectors)
