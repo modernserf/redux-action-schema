@@ -63,11 +63,11 @@ export function Record (defs, restDef = []) {
 const Optional = Exactly("optional")
 
 const tuples = {
-    nameType: Tuple([_types.String, _types.Object]),
-    nameCommentType: Tuple([_types.String, _types.String, _types.Object]),
-    nameTypeOptional: Tuple([_types.String, _types.Object, Optional]),
+    nameType: Tuple([_types.String, _types.Type]),
+    nameCommentType: Tuple([_types.String, _types.String, _types.Type]),
+    nameTypeOptional: Tuple([_types.String, _types.Type, Optional]),
     nameCommentTypeOptional: Tuple([
-        _types.String, _types.String, _types.Object, Optional,
+        _types.String, _types.String, _types.Type, Optional,
     ]),
 }
 

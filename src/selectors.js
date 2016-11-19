@@ -22,7 +22,7 @@ const Selector = types.Variant([
         ["reducer", types.Function]])],
     ["reducerMap", types([
         ["initState", types.Any],
-        ["reducers", types.Object]])],
+        ["reducers", types.ObjectOf(types.Function)]])],
     ["selector", types([
         ["dependencies", types.ArrayOf(types.String)],
         ["selector", types.Function]])],
@@ -50,7 +50,7 @@ const SelectorDef = types.Record([
         types.Function, // raw reducer
         Selector,
     ])],
-    ["returnType", types.Object, "optional"],
+    ["returnType", types.Type, "optional"],
 ])
 
 function buildFields (baseFields) {

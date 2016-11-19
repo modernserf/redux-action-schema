@@ -3,13 +3,14 @@
 # types
 
 ## base types
-- Object
-- Number
-- String
-- Boolean
-- Function
-- Array
-- Any
+- `Object`
+- `Number`
+- `String`
+- `Boolean`
+- `Function`
+- `Array`
+- `Type` matches a type object
+- `Any` matches anything besides `null` or `undefined`
 
 ## parameterized types
 - Exactly(value)

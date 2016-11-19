@@ -8,7 +8,7 @@ const VariantField = Record([
     ["type", types.String],
     ["doc", types.String, "optional"],
     // ["creator", types.Function, "optional"],
-    ["payloadType", types.Object, "optional"],
+    ["payloadType", types.Type, "optional"],
 ])
 
 export const VariantBody = Shape([

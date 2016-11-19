@@ -6,6 +6,7 @@ const tests = [
     ["Function", (val) => typeof val === "function"],
     ["Array", Array.isArray],
     ["Any", (val) => val !== undefined && val !== null],
+    ["Type", (val) => val && typeof val.test === "function"],
 ]
 
 export const types = tests.reduce((obj, [key, test]) => {

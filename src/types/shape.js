@@ -5,7 +5,7 @@ import { Record } from "./record"
 const ShapeField = Record([
     ["key", types.String],
     ["doc", types.String, "optional"],
-    ["type", types.Object],
+    ["type", types.Type],
     ["optional", Exactly("optional"), "optional"],
 ])
 

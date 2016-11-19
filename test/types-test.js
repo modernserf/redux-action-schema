@@ -21,6 +21,16 @@ test("type checking", (t) => {
     t.end()
 })
 
+test("Type", (t) => {
+    t.true(types.Type.test(types.Object))
+    t.true(types.Type.test({ test: (value) => true }))
+    t.true(types.Type.test(/foo/))
+    t.false(types.Type.test({}))
+    t.false(types.Type.test(""))
+    t.false(types.Type.test(() => {}))
+    t.end()
+})
+
 test("Exactly", (t) => {
     t.true(types.Exactly("foo").test("foo"))
     t.true(types.Exactly(0).test(0))
