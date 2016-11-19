@@ -1,4 +1,4 @@
-import { Exactly } from "./collection"
+import { Exactly, Tuple, OneOfType } from "./collection"
 import { types as _types } from "./base"
 
 // Record is a format for describing tuples
@@ -11,14 +11,13 @@ export function Record (defs, restDef = []) {
         let valIndex = 0
         for (let i = 0; i < fields.length; i++) {
             const field = fields[i]
-            const val = vals[valIndex]
 
-            if (field.type.test(val)) {
+            if (field.type.test(vals[valIndex])) { // field matches
                 valIndex++
-                continue
+            } else if (!field.optional) { // mandatory field, doesn't match
+                return false
             }
-            if (field.optional) { continue }
-            return false
+            // optional field; continue
         }
         if (valIndex === vals.length) { return true }
         try {
@@ -51,40 +50,48 @@ export function Record (defs, restDef = []) {
         return res
     }
 
-    const fieldSchema = fields.map(({ schema }) => `\n    ${schema}`).join("")
-
     return {
         test,
         defs,
         fields,
-        schema: `Record{${fieldSchema}\n}`,
         toObject,
     }
 }
 
-export const Field = Record([
-    ["name", _types.String],
-    ["comment", "AKA docstring", _types.String, "optional"],
-    ["type", _types.Object],
-    ["optional", Exactly("optional"), "optional"],
+const Optional = Exactly("optional")
+
+const tuples = {
+    nameType: Tuple([_types.String, _types.Object]),
+    nameCommentType: Tuple([_types.String, _types.String, _types.Object]),
+    nameTypeOptional: Tuple([_types.String, _types.Object, Optional]),
+    nameCommentTypeOptional: Tuple([
+        _types.String, _types.String, _types.Object, Optional,
+    ]),
+}
+
+const Field = OneOfType([
+    tuples.nameType,
+    tuples.nameCommentType,
+    tuples.nameTypeOptional,
+    tuples.nameCommentTypeOptional,
 ])
 
 // bootstrap record parsing (a field definition is made of fields)
 function parseField (arr) {
-    const [a, b, c, d] = arr
-    const name = a
+    const shape = Field.matchedType(arr)
+    if (!shape) { throw new Error(`Invalid record field`) }
 
-    const _comment = b
-    const hasComment = typeof _comment === "string"
-    const comment = hasComment ? _comment : ""
-
-    const type = hasComment ? c : b
-
-    const _optional = hasComment ? d : c
-    const optional = _optional === "optional"
-
-    const schema = `${name}${optional ? "?" : ""}:${type.schema}` +
-        comment ? ` -- ${comment}` : ""
-
-    return { name, comment, type, optional, schema }
+    if (shape === tuples.nameType) {
+        const [name, type] = arr
+        return { name, type, comment: "", optional: false }
+    } else if (shape === tuples.nameCommentType) {
+        const [name, comment, type] = arr
+        return { name, type, comment, optional: false }
+    } else if (shape === tuples.nameTypeOptional) {
+        const [name, type] = arr
+        return { name, type, comment: "", optional: true }
+    } else {
+        const [name, comment, type] = arr
+        return { name, type, comment, optional: true }
+    }
 }

@@ -35,11 +35,8 @@ export function Shape (defs) {
         ({ key, type, optional }) =>
             (optional && !(key in obj)) || type.test(obj[key]))
 
-    const fieldSchema = fields.map(({ schema }) => `\n    ${schema}`).join("")
-
     return {
         test,
-        schema: `Object{${fieldSchema}}`,
         fields,
     }
 }
