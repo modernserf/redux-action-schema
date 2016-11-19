@@ -1,35 +1,16 @@
 import { types } from "./base"
-import { Exactly, OneOfType } from "./collection"
+import { Exactly } from "./collection"
 import { Record } from "./record"
 
-const ShapeField = OneOfType([
-    Record([
-        ["key", types.String],
-        ["doc", types.String, "optional"],
-        ["type", types.Object],
-        ["optional", Exactly("optional"), "optional"],
-    ]),
-    Record([
-        ["key", types.String],
-        ["doc", types.String, "optional"],
-    ], ["children", Record]),
+const ShapeField = Record([
+    ["key", types.String],
+    ["doc", types.String, "optional"],
+    ["type", types.Object],
+    ["optional", Exactly("optional"), "optional"],
 ])
 
-ShapeField.toObject = (val) => {
-    return ShapeField.matchedType(val).toObject(val)
-}
-
 export function Shape (defs) {
-    const fields = defs.map((def) => {
-        const o = ShapeField.toObject(def)
-        if (o.children) {
-            o.type = Shape(o.children.defs)
-        }
-        o.schema = `${o.key}${o.optional ? "?" : ""}:${o.type.schema}` +
-            o.doc ? ` -- ${o.doc}` : ""
-
-        return o
-    })
+    const fields = defs.map(ShapeField.toObject)
 
     const test = (obj) => fields.every(
         ({ key, type, optional }) =>

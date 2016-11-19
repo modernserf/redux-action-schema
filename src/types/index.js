@@ -6,10 +6,16 @@ import { Record } from "./record"
 import { Shape } from "./shape"
 import { Variant } from "./variant"
 
-export const types = Object.assign({
-    Exactly, Optional, InstanceOf, OneOf, ArrayOf, ObjectOf, OneOfType, Recursive, Tuple,
-    Record, Shape, Variant,
+const types = Object.assign({
+    Exactly, Optional, InstanceOf, OneOf, ArrayOf, ObjectOf, OneOfType,
+    Recursive, Tuple, Record, Shape, Variant,
 }, baseTypes)
+
+for (const key in types) {
+    Shape[key] = types[key]
+}
+
+export { Shape as types }
 
 const PropType = Record([
     ["name", baseTypes.String],

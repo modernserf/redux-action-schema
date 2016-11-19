@@ -8,13 +8,14 @@ export const Promise = types.Variant([
 ])
 
 export const promiseActions = types.Variant([
-    ["requestedPromise", ["id", types.String]],
-    ["resolvedPromise",
+    ["requestedPromise", types([
+        ["id", types.String]])],
+    ["resolvedPromise", types([
         ["id", types.String],
-        ["data", types.Any]],
-    ["rejectedPromise",
+        ["data", types.Any]])],
+    ["rejectedPromise", types([
         ["id", types.String],
-        ["error", types.Any]],
+        ["error", types.Any]])],
 ], { mapType: (type) => `redux-action-schema/${type}` })
 
 const {

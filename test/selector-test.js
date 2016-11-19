@@ -49,9 +49,9 @@ test("createSelectors with return types", (t) => {
         createSelectors([
             ["foo", "a plain reducer", fooReducer],
             ["bar", "a schematized reducer", barReducer, types.String],
-            ["baz", bazSelector,
+            ["baz", bazSelector, types([
                 ["foo", types.String],
-                ["bar", types.String]],
+                ["bar", types.String]])],
         ])
     })
 

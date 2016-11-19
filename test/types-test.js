@@ -156,7 +156,7 @@ test("Record", (t) => {
 })
 
 test("Shape", (t) => {
-    const Point = types.Shape([
+    const Point = types([
         ["x", types.Number],
         ["y", types.Number],
     ])
@@ -167,9 +167,9 @@ test("Shape", (t) => {
 
     const Location = types.Shape([
         ["id", types.String],
-        ["point",
+        ["point", types([
             ["x", types.Number],
-            ["y", types.Number]],
+            ["y", types.Number]])],
     ])
 
     t.true(Location.test({ id: "foo", point: { x: 10, y: 20 } }))
@@ -193,9 +193,9 @@ test("Variant", (t) => {
     const { creators } = types.Variant([
         ["foo"],
         ["bar", types.String],
-        ["baz", "has a comment",
+        ["baz", "has a comment", types([
             ["a", types.Number],
-            ["b", types.Number]],
+            ["b", types.Number]])],
     ])
 
     t.deepEquals(creators.foo(), { type: "foo" })

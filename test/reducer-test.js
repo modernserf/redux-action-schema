@@ -10,7 +10,9 @@ test("create reducer", (t) => {
     const createReducer = createReducerCreator(createActions([
         ["foo"],
         ["bar", types.String],
-        ["baz", ["a", types.Number], ["b", types.Number]],
+        ["baz", types([
+            ["a", types.Number],
+            ["b", types.Number]])],
     ]))
 
     const initState = { count: 0, message: "hello" }
@@ -90,7 +92,9 @@ test("createRootReducer", (t) => {
     const actions = createActions([
         ["foo"],
         ["bar", types.String],
-        ["baz", ["a", types.Number], ["b", types.Number]],
+        ["baz", types([
+            ["a", types.Number],
+            ["b", types.Number]])],
     ])
 
     const selectors = createSelectors([

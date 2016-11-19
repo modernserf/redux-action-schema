@@ -30,7 +30,9 @@ export function Record (defs, restDef = []) {
 
     const toObject = (vals) => {
         // TODO: throw
-        if (!test(vals)) { return }
+        if (!test(vals)) {
+            throw new Error("Value does not match record shape: " + vals)
+        }
 
         const res = {}
         let valIndex = 0
@@ -79,7 +81,7 @@ const Field = OneOfType([
 // bootstrap record parsing (a field definition is made of fields)
 function parseField (arr) {
     const shape = Field.matchedType(arr)
-    if (!shape) { throw new Error(`Invalid record field`) }
+    if (!shape) { throw new Error(`Invalid record field ${arr[0]}`) }
 
     if (shape === tuples.nameType) {
         const [name, type] = arr

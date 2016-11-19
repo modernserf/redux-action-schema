@@ -5,9 +5,9 @@ test("makes action creators", (t) => {
     const actions = createActions([
         ["foo"],
         ["bar", types.String],
-        ["baz", "has a comment",
+        ["baz", "has a comment", types([
             ["a", types.Number],
-            ["b", types.Number]],
+            ["b", types.Number]])],
     ])
     t.deepEquals(actions.foo(), { type: "foo" })
     t.deepEquals(actions.bar("payload"), { type: "bar", payload: "payload" })
@@ -21,9 +21,9 @@ test("action creators have extra fields", (t) => {
     const actions = createActions([
         ["foo"],
         ["bar", types.String],
-        ["baz", "has a comment",
+        ["baz", "has a comment", types([
             ["a", types.Number],
-            ["b", types.Number]],
+            ["b", types.Number]])],
     ])
     t.equals(actions.foo.type, "foo")
     t.deepEquals(actions.foo.field, { type: "foo" })
@@ -77,9 +77,9 @@ test("combine actions", (t) => {
         ],
         ns2: createActions([
             ["foo"],
-            ["baz", "has a comment",
+            ["baz", "has a comment", types([
                 ["a", types.Number],
-                ["b", types.Number]],
+                ["b", types.Number]])],
         ]),
     }, (prefix, action) => `${prefix}/${action}`)
 

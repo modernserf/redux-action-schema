@@ -1,28 +1,20 @@
 import { types } from "./base"
-import { OneOfType } from "./collection"
 import { Record } from "./record"
 import { Shape } from "./shape"
 import { keyBy, id } from "../util"
 import { duplicateVariantError, namespaceError } from "../errors"
 
-const VariantField = OneOfType([
-    Record([
-        ["type", types.String],
-        ["doc", types.String, "optional"],
-        ["payloadType", types.Object, "optional"],
-    ]),
-    Record([
-        ["type", types.String],
-        ["doc", types.String, "optional"],
-    ], ["payloadType", Shape]),
+const VariantField = Record([
+    ["type", types.String],
+    ["doc", types.String, "optional"],
+    // ["creator", types.Function, "optional"],
+    ["payloadType", types.Object, "optional"],
 ])
 
 export const VariantBody = Shape([
     ["type", types.String],
     ["payload", types.Any, "optional"],
 ])
-
-VariantField.toObject = (val) => VariantField.matchedType(val).toObject(val)
 
 export function Variant (defs, {
     mapType = id,
@@ -33,8 +25,8 @@ export function Variant (defs, {
     const creators = keyBy(
         fields.map((field) => {
             const type = mapType(field.type)
-            const creator = field.payloadType
-                ? (payload) => ({ type, payload })
+            const creator = field.creator ? field.creator
+                : field.payloadType ? (payload) => ({ type, payload })
                 : () => ({ type })
 
             creator.type = type

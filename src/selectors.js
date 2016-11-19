@@ -16,17 +16,17 @@ export function createSelectors (specs, { mapSelectorName } = {}) {
 }
 
 const Selector = types.Variant([
-    ["plainReducer",
-        ["reducer", types.Function]],
-    ["reducerMap",
+    ["plainReducer", types([
+        ["reducer", types.Function]])],
+    ["reducerMap", types([
         ["initState", types.Any],
-        ["reducers", types.Object]],
-    ["selector",
+        ["reducers", types.Object]])],
+    ["selector", types([
         ["dependencies", types.ArrayOf(types.String)],
-        ["selector", types.Function]],
-    ["asyncSelector",
+        ["selector", types.Function]])],
+    ["asyncSelector", types([
         ["dependencies", types.ArrayOf(types.String)],
-        ["selector", types.Function]],
+        ["selector", types.Function]])],
 ])
 
 export function selector (dependencies, selector) {
@@ -41,27 +41,15 @@ export function asyncSelector (dependencies, selector) {
     return Selector.creators.asyncSelector({ dependencies, selector })
 }
 
-const SelectorDef = types.OneOfType([
-    types.Record([
-        ["id", types.String],
-        ["doc", types.String, "optional"],
-        ["selector", types.OneOfType([
-            types.Function, // raw reducer
-            Selector,
-        ])],
-        ["returnType", types.Object, "optional"],
-    ]),
-    types.Record([
-        ["id", types.String],
-        ["doc", types.String, "optional"],
-        ["selector", types.OneOfType([
-            types.Function, // raw reducer
-            Selector,
-        ])],
-    ], ["returnType", types.Shape]),
+const SelectorDef = types.Record([
+    ["id", types.String],
+    ["doc", types.String, "optional"],
+    ["selector", types.OneOfType([
+        types.Function, // raw reducer
+        Selector,
+    ])],
+    ["returnType", types.Object, "optional"],
 ])
-
-SelectorDef.toObject = (val) => SelectorDef.matchedType(val).toObject(val)
 
 function buildFields (baseFields) {
     // TODO throw error on invalid definition
