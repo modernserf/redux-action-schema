@@ -32,15 +32,15 @@ const Selector = types.Variant([
 ])
 
 export function selector (dependencies, selector) {
-    return Selector.creators.selector({ dependencies, selector })
+    return Selector.selector({ dependencies, selector })
 }
 
 export function reducer (reducers, initState) {
-    return Selector.creators.reducerMap({ reducers, initState })
+    return Selector.reducerMap({ reducers, initState })
 }
 
 export function asyncSelector (dependencies, selector) {
-    return Selector.creators.asyncSelector({ dependencies, selector })
+    return Selector.asyncSelector({ dependencies, selector })
 }
 
 const SelectorDef = types.Record([
@@ -58,7 +58,7 @@ function buildFields (baseFields) {
     return baseFields.map((def) => {
         const field = SelectorDef.toObject(def)
         if (typeof field.selector === "function") {
-            field.selector = Selector.creators.plainReducer({
+            field.selector = Selector.plainReducer({
                 reducer: field.selector,
             })
         }

@@ -20,31 +20,33 @@ export function Variant (defs, {
     mapType = id,
     duplicateError = duplicateVariantError,
 } = {}) {
-    const fields = defs.fields ? defs.fields : defs.map(VariantField.toObject)
+    const fields = defs.map((def) => {
+        const field = VariantField.toObject(def)
+        const type = mapType(field.type)
+        const creator = field.creator ? field.creator
+            : field.payloadType ? (payload) => ({ type, payload })
+            : () => ({ type })
+
+        creator.type = type
+        creator.field = field
+        return creator
+    })
 
     const creators = keyBy(
-        fields.map((field) => {
-            const type = mapType(field.type)
-            const creator = field.creator ? field.creator
-                : field.payloadType ? (payload) => ({ type, payload })
-                : () => ({ type })
-
-            creator.type = type
-            creator.field = field
-
-            return creator
-        }),
+        fields,
         ({ field }) => field.type,
         duplicateError)
 
-    keyBy(fields, ({ type }) => mapType(type), namespaceError)
+    const mappedCreators = keyBy(fields, ({ type }) => type, namespaceError)
 
     const test = (val) => {
         if (!val || !val.type) { return false }
         if (!creators[val.type]) { return false }
 
         const { payloadType } = creators[val.type].field
-        if ((val.payloadType && !payloadType) ||
+        // has payload when none expected
+        if ((val.payload && !payloadType) ||
+            // payload doesnt match
             (payloadType && !payloadType.test(val.payload))) {
             return false
         }
@@ -52,9 +54,9 @@ export function Variant (defs, {
         return true
     }
 
-    return {
-        fields,
+    return Object.assign(creators, {
         test,
-        creators,
-    }
+        get: (type) => creators[type],
+        matchedType: (val) => mappedCreators[val.type],
+    })
 }

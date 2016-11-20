@@ -25,3 +25,9 @@ export function pick (source, names) {
     }
     return res
 }
+
+export function compose (f, g) {
+    return function (...args) {
+        return f(g(...args))
+    }
+}

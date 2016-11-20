@@ -61,8 +61,8 @@ test("OneOf", (t) => {
     t.false(Enum.test("quux"))
     t.false(Enum.test(null))
 
-    t.true(Enum.values.foo === "foo")
-    t.true(Enum.values.quux === undefined)
+    t.true(Enum.foo === "foo")
+    t.true(Enum.quux === undefined)
 
     t.end()
 })
@@ -182,12 +182,12 @@ test("Variant", (t) => {
         ["nothing"],
     ])
 
-    t.deepEquals(Maybe.creators.just("value"), {
+    t.deepEquals(Maybe.just("value"), {
         type: "just", payload: "value",
     })
-    t.deepEquals(Maybe.creators.nothing(), { type: "nothing" })
+    t.deepEquals(Maybe.nothing(), { type: "nothing" })
 
-    const { creators } = types.Variant([
+    const variant = types.Variant([
         ["foo"],
         ["bar", types.String],
         ["baz", "has a comment", types([
@@ -195,24 +195,24 @@ test("Variant", (t) => {
             ["b", types.Number]])],
     ])
 
-    t.deepEquals(creators.foo(), { type: "foo" })
-    t.deepEquals(creators.bar("value"), {
+    t.deepEquals(variant.foo(), { type: "foo" })
+    t.deepEquals(variant.bar("value"), {
         type: "bar", payload: "value",
     })
-    t.deepEquals(creators.baz({ a: 10, b: 20 }),
+    t.deepEquals(variant.baz({ a: 10, b: 20 }),
         { type: "baz", payload: { a: 10, b: 20 } })
 
     t.end()
 })
 
 test("Variant mapping", (t) => {
-    const { creators } = types.Variant([
+    const variant = types.Variant([
         ["foo"],
         ["bar", types.String],
     ], { mapType: (type) => "namespace/" + type })
 
-    t.deepEquals(creators.foo(), { type: "namespace/foo" })
-    t.deepEquals(creators.bar("value"), {
+    t.deepEquals(variant.foo(), { type: "namespace/foo" })
+    t.deepEquals(variant.bar("value"), {
         type: "namespace/bar", payload: "value",
     })
 

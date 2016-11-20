@@ -15,23 +15,14 @@ export function createActionMonitor (actions, {
     onUnknownAction = defaultUnknownAction,
     onMismatchedPayload = null,
 } = {}) {
-    const mergedActions = flattenActionTree(actions)
-
     const test = (action) => {
         if (typeof action !== "object") { return }
         if (!filterActions(action)) { return }
 
-        if (!mergedActions[action.type]) {
-            if (onUnknownAction) { onUnknownAction(action) }
-        } else if (onMismatchedPayload) {
-            // TODO: use Action(schema).test?
-
-            const { payloadType } = mergedActions[action.type].field
-
-            if ((action.payload && !payloadType) ||
-                (payloadType && !payloadType.test(action.payload))) {
-                onMismatchedPayload(action, payloadType)
-            }
+        if (onUnknownAction && !actions.matchedType(action)) {
+            onUnknownAction(action)
+        } else if (onMismatchedPayload && !actions.test(action)) {
+            onMismatchedPayload(action)
         }
     }
 
@@ -39,16 +30,4 @@ export function createActionMonitor (actions, {
         test(action)
         return next(action)
     }
-}
-
-function flattenActionTree (tree, res = {}) {
-    for (const key in tree) {
-        if (typeof tree[key] === "function") {
-            const action = tree[key]
-            res[action.type] = action
-        } else {
-            flattenActionTree(tree[key], res)
-        }
-    }
-    return res
 }

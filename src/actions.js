@@ -1,37 +1,59 @@
 import { duplicateActionError, namespaceError } from "./errors"
+import { scopeActionType, createScopedAction, popScope } from "./scope"
 const { types } = require("./types")
 
-export function createActions (baseFields, { mapActionType } = {}) {
-    const fields = baseFields._actionSchema || baseFields
-
-    const actions = types.Variant(fields, {
+export function createActions (fields, { mapActionType } = {}) {
+    return types.Variant(fields, {
         mapType: mapActionType,
         namespaceError: namespaceError,
         duplicateError: duplicateActionError,
     })
-
-    tagAsActions(actions.creators, actions)
-    return actions.creators
 }
 
-export function combineActions (actionsByNamespace, addNamespace) {
-    const res = {}
-    for (const namespace in actionsByNamespace) {
-        const actions = actionsByNamespace[namespace]
-        if (Array.isArray(actions) || actions._actionSchema) {
-            res[namespace] = createActions(
-                actions,
-                { mapActionType: (action) => addNamespace(namespace, action) })
-        } else {
-            const deepAddNamespace = (ns, action) =>
-                addNamespace(namespace
-                    , addNamespace(ns, action))
-            res[namespace] = combineActions(actions, deepAddNamespace)
+// mergeActions([...actions, check for collisions])
+
+export function combineActions (actionsByScope, rootActions, parentScope) {
+    const res = rootActions ? Object.assign({}, rootActions) : {}
+
+    for (const scopeName in actionsByScope) {
+        const scope = parentScope
+            ? parentScope.concat([scopeName])
+            : [scopeName]
+        const scopedActions = {}
+        const actions = actionsByScope[scopeName]
+
+        // recursive combinations
+        if (!actions.test) {
+            res[scopeName] = combineActions(actions, null, scope)
+            continue
         }
-    }
-    return res
-}
 
-function tagAsActions (obj, test) {
-    Object.defineProperty(obj, "_actionSchema", { value: test })
+        for (const actionType in actions) {
+            scopedActions[actionType] = createScopedAction(
+                actions[actionType],
+                scope)
+        }
+        res[scopeName] = scopedActions
+    }
+
+    res.get = (type) => {
+        return rootActions.get(type) || actionsByScope[type]
+    }
+
+    res.matchedType = (action) => {
+        const rootMatch = rootActions.matchedType(action)
+        if (rootMatch) { return rootMatch }
+        if (action.type !== scopeActionType) { return undefined }
+        const { scopeName, action: poppedAction } = popScope(action)
+        return res[scopeName].matchedType(poppedAction)
+    }
+
+    res.test = (action) => {
+        if (rootActions && rootActions.test(action)) { return true }
+        if (action.type !== scopeActionType) { return false }
+        const { scopeName, action: poppedAction } = popScope(action)
+        return res[scopeName].test(poppedAction)
+    }
+
+    return res
 }

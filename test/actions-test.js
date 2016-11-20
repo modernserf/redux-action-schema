@@ -1,5 +1,7 @@
 const test = require("tape")
-const { createActions, combineActions, types } = require("../index.js")
+const {
+    scopeActionType, createActions, combineActions, types,
+} = require("../index.js")
 
 test("makes action creators", (t) => {
     const actions = createActions([
@@ -51,69 +53,106 @@ test("map action types", (t) => {
     t.end()
 })
 
-test("apply mapActionType to existing actions", (t) => {
-    const actions = createActions([
-        ["foo"],
-        ["bar", types.String],
-    ])
-
-    const nsActions = createActions(
-        actions,
-        { mapActionType: (type) => "namespace/" + type })
-
-    t.deepEquals(actions.foo(), { type: "foo" })
-    t.deepEquals(actions.bar("payload"), { type: "bar", payload: "payload" })
-    t.deepEquals(nsActions.foo(), { type: "namespace/foo" })
-    t.deepEquals(nsActions.bar("payload"),
-        { type: "namespace/bar", payload: "payload" })
-    t.end()
-})
-
 test("combine actions", (t) => {
     const actions = combineActions({
-        ns1: [
+        ns1: createActions([
             ["foo"],
             ["bar", types.String],
-        ],
+        ]),
         ns2: createActions([
             ["foo"],
             ["baz", "has a comment", types([
                 ["a", types.Number],
                 ["b", types.Number]])],
         ]),
-    }, (prefix, action) => `${prefix}/${action}`)
+    })
 
-    t.deepEquals(actions.ns1.foo(), { type: "ns1/foo" })
-    t.deepEquals(actions.ns1.bar("payload"),
-        { type: "ns1/bar", payload: "payload" })
-    t.deepEquals(actions.ns2.foo(), { type: "ns2/foo" })
-    t.deepEquals(actions.ns2.baz({ a: 10, b: 20 }),
-        { type: "ns2/baz", payload: { a: 10, b: 20 } })
+    t.deepEquals(actions.ns1.foo(), {
+        type: scopeActionType,
+        payload: { scope: ["ns1"], action: { type: "foo" } },
+    })
+    t.deepEquals(actions.ns1.bar("payload"), {
+        type: scopeActionType,
+        payload: {
+            scope: ["ns1"],
+            action: { type: "bar", payload: "payload" },
+        },
+    })
+    t.deepEquals(actions.ns2.foo(), {
+        type: scopeActionType,
+        payload: { scope: ["ns2"], action: { type: "foo" } },
+    })
+    t.deepEquals(actions.ns2.baz({ a: 10, b: 20 }), {
+        type: scopeActionType,
+        payload: {
+            scope: ["ns2"],
+            action: { type: "baz", payload: { a: 10, b: 20 } },
+        },
+    })
+    t.end()
+})
+
+test("combine actions with root", (t) => {
+    const actions = combineActions({
+        ns1: createActions([
+            ["foo"],
+            ["bar", types.String],
+        ]),
+    }, createActions([
+        ["foo"],
+        ["baz", "has a comment", types([
+            ["a", types.Number],
+            ["b", types.Number]])],
+    ]))
+
+    t.deepEquals(actions.ns1.foo(), {
+        type: scopeActionType,
+        payload: { scope: ["ns1"], action: { type: "foo" } },
+    })
+    t.deepEquals(actions.ns1.bar("payload"), {
+        type: scopeActionType,
+        payload: {
+            scope: ["ns1"],
+            action: { type: "bar", payload: "payload" },
+        },
+    })
+
+    t.deepEquals(actions.foo(), { type: "foo" })
+    t.deepEquals(actions.baz({ a: 10, b: 20 }),
+        { type: "baz", payload: { a: 10, b: 20 } })
+
     t.end()
 })
 
 test("deep combine actions", (t) => {
-    const ns = (prefix, action) => `${prefix}/${action}`
     const actions = combineActions({
-        a1: [
+        a1: createActions([
             ["foo"],
             ["bar", types.String],
-        ],
+        ]),
         b1: {
-            a2: [
+            a2: createActions([
                 ["foo"],
                 ["bar", types.String],
-            ],
-            b2: [
+            ]),
+            b2: createActions([
                 ["foo"],
                 ["bar", types.String],
-            ],
+            ]),
         },
-    }, ns)
-    console.log(actions)
-    t.deepEquals(actions.a1.foo(), { type: "a1/foo" })
-    t.deepEquals(actions.b1.a2.foo(), { type: "b1/a2/foo" })
-    t.deepEquals(actions.b1.b2.foo(), { type: "b1/b2/foo" })
+    })
+    t.deepEquals(actions.a1.foo(), {
+        type: scopeActionType,
+        payload: { scope: ["a1"], action: { type: "foo" } },
+    })
+    t.deepEquals(actions.b1.a2.foo(), {
+        type: scopeActionType,
+        payload: { scope: ["b1", "a2"], action: { type: "foo" } },
+    })
+    t.deepEquals(actions.b1.b2.foo(), {
+        type: scopeActionType,
+        payload: { scope: ["b1", "b2"], action: { type: "foo" } },
+    })
     t.end()
 })
 

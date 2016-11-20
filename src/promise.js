@@ -20,7 +20,7 @@ export const promiseActions = types.Variant([
 
 const {
     requestedPromise, resolvedPromise, rejectedPromise,
-} = promiseActions.creators
+} = promiseActions
 
 export function createPromiseMiddleware (selectors) {
     const promiseHandlers = Object.keys(selectors)
@@ -66,19 +66,19 @@ function createPromiseChangeHandler ({ id, field }, allSelectors) {
 }
 
 export function createPromiseReducer (id, createReducerCreator) {
-    const createReducer = createReducerCreator(promiseActions.creators)
+    const createReducer = createReducerCreator(promiseActions)
 
     const isValid = (payload) => payload.id === id
 
     return createReducer({
         requestedPromise: (state, payload) => isValid(payload)
-            ? Promise.creators.pending()
+            ? Promise.pending()
             : state,
         resolvedPromise: (state, payload) => isValid(payload)
-            ? Promise.creators.resolved(payload.data)
+            ? Promise.resolved(payload.data)
             : state,
         rejectedPromise: (state, payload) => isValid(payload)
-            ? Promise.creators.rejected(payload.error)
+            ? Promise.rejected(payload.error)
             : state,
-    }, Promise.creators.pending())
+    }, Promise.pending())
 }

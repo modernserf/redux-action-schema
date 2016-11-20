@@ -26,7 +26,7 @@ export function OneOf (values) {
 
     return Object.assign({}, valueMap, {
         test: (val) => !!valueMap[val],
-        values: valueMap,
+        get: (val) => valueMap[val],
     })
 }
 

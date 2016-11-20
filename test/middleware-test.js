@@ -56,10 +56,10 @@ test("handle bad payload", (t) => {
     })
     t.throws(() => {
         store.dispatch({ type: "bar", payload: { a: "bad argument" } })
-    })
+    }, "payload when none expected")
     t.throws(() => {
         store.dispatch({ type: "foo", payload: "arg" })
-    })
+    }, "payload doesn't match")
     t.end()
 })
 
