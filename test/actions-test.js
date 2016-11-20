@@ -1,7 +1,9 @@
 const test = require("tape")
 const {
-    scopeActionType, createActions, combineActions, types,
+    createActions, combineActions, types,
 } = require("../index.js")
+
+const scopeActionType = "redux-action-schema/scopedAction"
 
 test("makes action creators", (t) => {
     const actions = createActions([
@@ -89,38 +91,6 @@ test("combine actions", (t) => {
             action: { type: "baz", payload: { a: 10, b: 20 } },
         },
     })
-    t.end()
-})
-
-test("combine actions with root", (t) => {
-    const actions = combineActions({
-        ns1: createActions([
-            ["foo"],
-            ["bar", types.String],
-        ]),
-    }, createActions([
-        ["foo"],
-        ["baz", "has a comment", types([
-            ["a", types.Number],
-            ["b", types.Number]])],
-    ]))
-
-    t.deepEquals(actions.ns1.foo(), {
-        type: scopeActionType,
-        payload: { scope: ["ns1"], action: { type: "foo" } },
-    })
-    t.deepEquals(actions.ns1.bar("payload"), {
-        type: scopeActionType,
-        payload: {
-            scope: ["ns1"],
-            action: { type: "bar", payload: "payload" },
-        },
-    })
-
-    t.deepEquals(actions.foo(), { type: "foo" })
-    t.deepEquals(actions.baz({ a: 10, b: 20 }),
-        { type: "baz", payload: { a: 10, b: 20 } })
-
     t.end()
 })
 

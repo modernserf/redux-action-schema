@@ -1,5 +1,5 @@
 import { duplicateActionError, namespaceError } from "./errors"
-import { scopeActionType, createScopedAction, popScope } from "./scope"
+import { createScopedAction, getInScope } from "./scope"
 const { types } = require("./types")
 
 export function createActions (fields, { mapActionType } = {}) {
@@ -10,10 +10,27 @@ export function createActions (fields, { mapActionType } = {}) {
     })
 }
 
-// mergeActions([...actions, check for collisions])
+export function mergeActions (actionSchemas) {
+    const merged = {}
+    const actionTypes = {}
+    for (let i = 0; i < actionSchemas.length; i++) {
+        const actions = actionSchemas[i]
+        for (const key in actions) {
+            const action = actions.key
+            if (merged[key]) { throw duplicateActionError(key) }
+            if (actionTypes[action.type]) { throw namespaceError(action.type) }
+            merged[key] = action
+            actionTypes[action.type] = action
+        }
+    }
 
-export function combineActions (actionsByScope, rootActions, parentScope) {
-    const res = rootActions ? Object.assign({}, rootActions) : {}
+    merged.test = (val) => actionSchemas.some((actions) => actions.test(val))
+    merged.matchedType = (val) =>
+        actionSchemas.find()
+}
+
+export function combineActions (actionsByScope, parentScope) {
+    const res = {}
 
     for (const scopeName in actionsByScope) {
         const scope = parentScope
@@ -24,7 +41,7 @@ export function combineActions (actionsByScope, rootActions, parentScope) {
 
         // recursive combinations
         if (!actions.test) {
-            res[scopeName] = combineActions(actions, null, scope)
+            res[scopeName] = combineActions(actions, scope)
             continue
         }
 
@@ -36,24 +53,9 @@ export function combineActions (actionsByScope, rootActions, parentScope) {
         res[scopeName] = scopedActions
     }
 
-    res.get = (type) => {
-        return rootActions.get(type) || actionsByScope[type]
-    }
-
-    res.matchedType = (action) => {
-        const rootMatch = rootActions.matchedType(action)
-        if (rootMatch) { return rootMatch }
-        if (action.type !== scopeActionType) { return undefined }
-        const { scopeName, action: poppedAction } = popScope(action)
-        return res[scopeName].matchedType(poppedAction)
-    }
-
-    res.test = (action) => {
-        if (rootActions && rootActions.test(action)) { return true }
-        if (action.type !== scopeActionType) { return false }
-        const { scopeName, action: poppedAction } = popScope(action)
-        return res[scopeName].test(poppedAction)
-    }
-
+    res.matchedType = getInScope(
+        (scope, action) => res[scope].matchedType(action), undefined)
+    res.test = getInScope(
+        (scope, action) => res[scope].test(action), false)
     return res
 }

@@ -57,7 +57,6 @@
 # reducers
 
 ## createReducerCreator(actions, [scope]) => (reducerMap, initState, [scope])
-TODO scope as arg to factory or function?
 
 ## createRootReducer(actions, selectors)
 
