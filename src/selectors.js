@@ -21,6 +21,9 @@ const Selector = types.Variant([
     ["reducerMap",
         ["initState", types.Any],
         ["reducers", types.Object]],
+    ["dependentReducerMap",
+        ["initState", types.Any],
+        ["reducerGroup", types.Object]],
     ["selector",
         ["dependencies", types.ArrayOf(types.String)],
         ["selector", types.Function]],
@@ -35,6 +38,10 @@ export function selector (dependencies, selector) {
 
 export function reducer (reducers, initState) {
     return Selector.creators.reducerMap({ reducers, initState })
+}
+
+export function reducerGroup (reducerGroup, initState) {
+    return Selector.creators.reducerMap({ reducerGroup, initState })
 }
 
 export function asyncSelector (dependencies, selector) {
@@ -83,6 +90,7 @@ export function createSelector (mapName = id, allSelectors) {
         const selector = ({
             plainReducer: (state) => state[id],
             reducerMap: (state) => state[id],
+            reducerGroup: (state) => state[id],
             asyncSelector: (state) => state[id],
             selector: createDepsSelector(
                 payload.dependencies,

@@ -30,35 +30,27 @@ export const actions = createActions([
     ["setVisibility", Visibility],
 ])
 
-const todoStore = reducer({
-    addedTodo: ({ todos, nextID }, { text }) => ({
-        nextID: nextID + 1,
-        todos: todos.concat([{ id: nextID, status: Status.active, text }]),
-    }),
-    editedTodo: ({ todos, nextID }, { id, text }) => ({
-        nextID,
-        todos: todos.map((todo) => todo.id === id ? { ...todo, text } : todo),
-    }),
-    toggledTodo: ({ todos, nextID }, id) => ({
-        nextID,
-        todos: todos.map((todo) =>
-            todo.id === id ? {
-                ...todo,
-                status: todo.status === Status.completed ? Status.active : Status.completed,
-            } : todo),
-    }),
-    deletedTodo: ({ todos, nextID }, id) => ({
-        nextID,
-        todos: todos.filter((todo) => todo.id !== id),
-    }),
-    completedAll: ({ todos, nextID }) => ({
-        nextID,
-        todos: todos.map((todo) => ({ ...todo, status: Status.completed })),
-    }),
-    clearedCompleted: ({ todos, nextID }) => ({
-        nextID,
-        todos: todos.filter((todo) => todo.status !== Status.completed),
-    }),
+const 
+
+const todoStore = reducerGroup({
+    nextID: {
+        addedTodo: (id) => id + 1,
+    },
+    todos: {
+        addedTodo: (todos, { text }, { nextID }) =>
+            todos.concat([{ id: nextID, status: Status.active, text }]),
+        editedTodo: (todos, { id, text }) =>
+            todos.map((todo) => todo.id === id ? { ...todo, text } : todo),
+        toggledTodo: (todos, id) =>
+            todos.map((todo) =>
+                todo.id === id ? {
+                    ...todo,
+                    status: todo.status === Status.completed ? Status.active : Status.completed,
+                } : todo),
+        deletedTodo: (todos, id) => todos.filter((todo) => todo.id !== id),
+        completedAll: (todos) => todos.map((todo) => ({ ...todo, status: Status.completed })),
+        clearedCompleted: (todos) => todos.filter((todo) => todo.status !== Status.completed),
+    },
 }, { todos: [], nextID: 1 })
 
 const visibility = reducer({
