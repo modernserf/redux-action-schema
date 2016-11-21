@@ -9,7 +9,11 @@ const ShapeField = Record([
     ["optional", Exactly("optional"), "optional"],
 ])
 
+// Shape(type) -> type
+// Shape([["foo", type], ["bar", type]]) -> { foo: type, bar: type }
 export function Shape (defs) {
+    if (defs.test) { return defs }
+
     const fields = defs.map(ShapeField.toObject)
 
     const test = (obj) => fields.every(

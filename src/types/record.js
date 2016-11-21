@@ -29,7 +29,6 @@ export function Record (defs, restDef = []) {
     }
 
     const toObject = (vals) => {
-        // TODO: throw
         if (!test(vals)) {
             throw new Error("Value does not match record shape: " + vals)
         }
