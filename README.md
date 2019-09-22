@@ -32,7 +32,8 @@ In larger Redux projects, action types are frequently collected in a constants f
 - If you make a typo when importing an action constant, you will get `undefined`. Redux will immediately throw when dispatching such an action, and you’ll find the mistake sooner.
 
 But the way this is frequently implemented is primitive and repetitive:
-```
+
+```js
 export const ADD_TODO = 'ADD_TODO'
 export const EDIT_TODO = 'EDIT_TODO'
 export const COMPLETE_TODO = 'COMPLETE_TODO'
@@ -48,7 +49,7 @@ export const SHOW_ACTIVE = 'show_active'
 
 This gets the job done, but its ugly and repetitive. Furthermore it doesn't provide any information about the _data_ in the action, only the type. Redux Action Schema enables compact action definitions with runtime type checks:
 
-```
+```js
 const showStates = ["all", "completed", "active"]
 
 const schema = createSchema([
@@ -89,7 +90,8 @@ This provides all of the benefits of using constants, but with additional benefi
 ## Generating a schema in an existing app
 
 Redux Action Schema also includes a middleware that can **automatically generate** a schema for an existing app. Add the schema observer middleware:
-```
+
+```js
 import { createSchemaObserver } from "redux-action-schema"
 import { createStore, applyMiddleware } from "redux"
 
@@ -105,7 +107,7 @@ Run the app (manually or with a test runner). Then, from the console:
 
 <!--  TODO: this is super confusing, but could be explained really simply with a gif (or even a comic strip?) -->
 
-```
+```js
 >   window.schemaObserver.schemaDefinitionString()
 <   "createSchema([
         ["foo"],
@@ -124,7 +126,7 @@ You can copy the output of `schemaDefinitionString` from the console into your c
 
 Protect against typos and automatically handle namespaces with generated actions:
 
-```
+```js
 schema.actions.addTodo // => "addTodo"
 schema.actions.adTodo  // => undefined
 
@@ -137,7 +139,7 @@ schema.actions.addTodo // => "foo_addTodo"
 
 An action creator is generated for each action in the schema:
 
-```
+```js
 const { editTodo, completeTodo } = schema.actionCreators
 editTodo({ id: 10, text: "write docs" })
 // => { type: "editTodo", payload: { id: 10, text: "write docs" } }
@@ -152,7 +154,7 @@ editTodo.byPosition(10, "write GOOD docs")
 
 The schema can be used to create and validate simple reducers a la redux-action's [handleActions](https://github.com/acdlite/redux-actions#handleactionsreducermap-defaultstate):
 
-```
+```js
 const todoReducer = schema.createReducer({
     addTodo: (state, { id, text }) =>
         state.concat([{ id, text, completed: false }])
@@ -165,7 +167,7 @@ const todoReducer = schema.createReducer({
 
 Unlike `handleActions`, createReducer verifies that a reducer's handled actions are in the schema:
 
-```
+```js
 schema.createReducer({
     nope: (state, payload) => state
 }, initState)
@@ -177,7 +179,7 @@ schema.createReducer({
 
 Finally, the schema generates a redux middleware for checking that dispatched actions are in the schema:
 
-```
+```js
 const store = createStore(
     reducer,
     applyMiddleware(schema.createMiddleware({
